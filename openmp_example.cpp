@@ -20,7 +20,7 @@ if(argc>1){
 
 omp_set_num_threads(thread_num);
 	// Length of vectors
-    unsigned int n = 10240000;
+    unsigned int n = 102400000;
  
     // Host input vectors
     double *h_a;

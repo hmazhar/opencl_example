@@ -123,7 +123,7 @@ return deviceIds;
 int main(int argc, char *argv[]){
 
 	// Length of vectors
-    unsigned int n = 10240000;
+    unsigned int n = 102400000;
  
     // Host input vectors
     double *h_a;
