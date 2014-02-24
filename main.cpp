@@ -183,10 +183,11 @@ int main(int argc, char *argv[]){
     deviceIds = GetDevices(platformIds[0]);
 
     // Create a context  
-    context = clCreateContext(0, 1, &deviceIds[device_num], NULL, NULL, &err);
- 
+    context = clCreateContext(0, 1, &deviceIds[device_num], NULL, NULL, &err);    CheckError (err);
+
+
     // Create a command queue 
-    queue = clCreateCommandQueue(context, deviceIds[device_num], CL_QUEUE_PROFILING_ENABLE, &err);
+    queue = clCreateCommandQueue(context, deviceIds[device_num], CL_QUEUE_PROFILING_ENABLE, &err);    CheckError (err);
  
     // Create the compute program from the source buffer
 
@@ -196,7 +197,7 @@ int main(int argc, char *argv[]){
     clBuildProgram(program, 0, NULL, "-cl-mad-enable -cl-denorms-are-zero", NULL, NULL);
  
     // Create the compute kernel in the program we wish to run
-    kernel = clCreateKernel(program, "vecAdd", &err);
+    kernel = clCreateKernel(program, "vecAdd", &err);    CheckError (err);
  
     // Create the input and output arrays in device memory for our calculation
     d_a = clCreateBuffer(context, CL_MEM_READ_ONLY, bytes, NULL, NULL);
@@ -211,14 +212,19 @@ int main(int argc, char *argv[]){
     err  = clSetKernelArg(kernel, 0, sizeof(cl_mem), &d_a);
     err |= clSetKernelArg(kernel, 1, sizeof(cl_mem), &d_b);
     err |= clSetKernelArg(kernel, 2, sizeof(cl_mem), &d_c);
-    err |= clSetKernelArg(kernel, 3, sizeof(unsigned int), &n);
- 
- double start = omp_get_wtime();
+    err |= clSetKernelArg(kernel, 3, sizeof(unsigned int), &n);    CheckError (err);
     // Execute the kernel over the entire range of the data set  
-    err = clEnqueueNDRangeKernel(queue, kernel, 1, NULL, &globalSize, &localSize, 0, NULL, &prof_event);
- 
+    err = clEnqueueNDRangeKernel(queue, kernel, 1, NULL, &globalSize, &localSize, 0, NULL, NULL);    CheckError (err);
     // Wait for the command queue to get serviced before reading back results
     clFinish(queue);
+
+
+    double start = omp_get_wtime();
+    // Execute the kernel over the entire range of the data set  
+    err = clEnqueueNDRangeKernel(queue, kernel, 1, NULL, &globalSize, &localSize, 0, NULL, &prof_event);    CheckError (err);
+     // Wait for the command queue to get serviced before reading back results
+    clFinish(queue);
+
     double end = omp_get_wtime();
  	clWaitForEvents(1 , &prof_event);
     // Read the results from the device
