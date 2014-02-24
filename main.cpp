@@ -35,10 +35,6 @@ std::string GetDeviceName (cl_device_id id)
 	std::string result;
 	result.resize (size);
 	clGetDeviceInfo (id, CL_DEVICE_NAME, size, const_cast<char*> (result.data ()), nullptr);
-	clGetDeviceInfo (id,  CL_DEVICE_MAX_WORK_GROUP_SIZE , size, &wg_size, nullptr);
-	cout<<"wg_size "<<wg_size<<endl;
-	clGetDeviceInfo (id,  CL_DEVICE_MAX_WORK_ITEM_SIZES , size, &wg_size, nullptr);
-	cout<<"item_size "<<wg_size<<endl;
 	return result;
 }
 
@@ -149,6 +145,14 @@ int main(int argc, char *argv[]){
     cl_kernel kernel;                 // kernel
  	cl_event prof_event;
  	cl_uint deviceIdCount = 0;
+
+
+ 	int device_num = 0;
+ 	if(argc>1){
+ 		device_num = atoi(argv[1]);
+ 	}
+
+
     // Size, in bytes, of each vector
     size_t bytes = n*sizeof(double);
  
@@ -179,10 +183,10 @@ int main(int argc, char *argv[]){
     deviceIds = GetDevices(platformIds[0]);
 
     // Create a context  
-    context = clCreateContext(0, 1, &deviceIds[2], NULL, NULL, &err);
+    context = clCreateContext(0, 1, &deviceIds[device_num], NULL, NULL, &err);
  
     // Create a command queue 
-    queue = clCreateCommandQueue(context, deviceIds[2], CL_QUEUE_PROFILING_ENABLE, &err);
+    queue = clCreateCommandQueue(context, deviceIds[device_num], CL_QUEUE_PROFILING_ENABLE, &err);
  
     // Create the compute program from the source buffer
 
