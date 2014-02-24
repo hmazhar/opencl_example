@@ -11,7 +11,14 @@ using namespace std;
 
 
 int main(int argc, char *argv[]){
-omp_set_num_threads(1);
+
+int thread_num = 1;
+if(argc>1){
+
+    thread_num = atoi(argv[1]);
+}
+
+omp_set_num_threads(thread_num);
 	// Length of vectors
     unsigned int n = 10240000;
  
