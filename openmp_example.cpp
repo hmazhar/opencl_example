@@ -49,11 +49,14 @@ omp_set_num_threads(thread_num);
 double start = omp_get_wtime();
 #pragma omp parallel for
 for(int id=0; id<n; id++){
+    double _a_ = a[id];
+    double _b_ = b[id];
+
         for(int i=0; i<100; i++){
-double _a = a[id] + b[id] * b[id] +(a[id] * b[id])/b[id];
-double _b = a[id] - b[id] / b[id] -(a[id] / b[id])*b[id];
-double _c = b[id] + a[id] * a[id] +(b[id] * a[id])/b[id];
-double _d = b[id] - a[id] / b[id] -(b[id] / b[id])*a[id];
+double _a = _a_ + _b_ * _b_ +(_a_ * _b_)/_b_;
+double _b = _a_ - _b_ / _b_ -(_a_ / _b_)*_b_;
+double _c = _b_ + _a_ * _a_ +(_b_ * _a_)/_b_;
+double _d = _b_ - _a_ / _b_ -(_b_ / _b_)*_a_;
 c[id] = _a + _b * _c +(_a * _d)/_c;
 }
 }
