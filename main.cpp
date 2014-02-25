@@ -98,15 +98,22 @@ std::vector<cl_device_id> GetDevices(cl_platform_id platform) {
 }
 
 int main(int argc, char *argv[]) {
-	unsigned int n = 10240000;
+	unsigned int contacts = 1024000*3;
+	unsigned int constraints = contacts*3;
 
-	double *h_a;
-	double *h_b;
-	double *h_c;
+	double *h_jx, *h_jy, *h_jz;
+	double *h_ju, *h_jv, *h_jw;
+	double *h_gx, *h_gy, *h_gz;
 
-	cl_mem d_a;
-	cl_mem d_b;
-	cl_mem d_c;
+	double *h_vx, *h_vy, *h_vz;
+	double *h_ox, *h_oy, *h_oz;
+
+	cl_mem d_jx, d_jy, d_jz;
+	cl_mem d_ju, d_jv, d_jw;
+	cl_mem d_gx, d_gy, d_gz;
+
+	cl_mem d_vx, d_vy, d_vz;
+	cl_mem d_ox, d_oy, d_oz;
 
 	std::vector<cl_platform_id> platformIds;     // OpenCL platform
 	std::vector<cl_device_id> deviceIds;         // device ID
@@ -123,18 +130,44 @@ int main(int argc, char *argv[]) {
 	}
 
 	// Size, in bytes, of each vector
-	size_t bytes = n * sizeof(double);
+	size_t bytes = constraints * sizeof(double);
 
 	// Allocate memory for each vector on host
-	h_a = (double*) malloc(bytes);
-	h_b = (double*) malloc(bytes);
-	h_c = (double*) malloc(bytes);
+	h_jx = (double*) malloc(bytes);
+	h_jy = (double*) malloc(bytes);
+	h_jz = (double*) malloc(bytes);
+
+	h_ju = (double*) malloc(bytes);
+	h_jv = (double*) malloc(bytes);
+	h_jw = (double*) malloc(bytes);
+
+	h_gx = (double*) malloc(bytes);
+	h_gy = (double*) malloc(bytes);
+	h_gz = (double*) malloc(bytes);
+
+	h_vx = (double*) malloc(bytes);
+	h_vy = (double*) malloc(bytes);
+	h_vz = (double*) malloc(bytes);
+
+	h_ox = (double*) malloc(bytes);
+	h_oy = (double*) malloc(bytes);
+	h_oz = (double*) malloc(bytes);
 
 	// Initialize vectors on host
 	int i;
-	for (i = 0; i < n; i++) {
-		h_a[i] = sinf(i) * sinf(i);
-		h_b[i] = cosf(i) * cosf(i);
+	for (i = 0; i < constraints; i++) {
+		h_jx[i] = sinf(i) * sinf(i);
+		h_jy[i] = cosf(i) * cosf(i);
+		h_jz[i] = cosf(i) * cosf(i);
+
+		h_ju[i] = sinf(i) * sinf(i);
+		h_jv[i] = cosf(i) * cosf(i);
+		h_jw[i] = cosf(i) * cosf(i);
+
+		h_gx[i] = sinf(i) * sinf(i);
+		h_gy[i] = cosf(i) * cosf(i);
+		h_gz[i] = cosf(i) * cosf(i);
+
 	}
 
 	size_t globalSize, localSize;
@@ -144,7 +177,7 @@ int main(int argc, char *argv[]) {
 	localSize = 128;
 
 	// Number of total work items - localSize must be devisor
-	globalSize = ceil(n / (float) localSize) * localSize;
+	globalSize = ceil(contacts / (float) localSize) * localSize;
 	// Bind to platform
 	platformIds = GetPlatforms();
 	// Get ID for the device
@@ -163,23 +196,67 @@ int main(int argc, char *argv[]) {
 	clBuildProgram(program, 0, NULL, "-cl-mad-enable -cl-denorms-are-zero", NULL, NULL);
 
 	// Create the compute kernel in the program we wish to run
-	kernel = clCreateKernel(program, "vecAdd", &err);
+	kernel = clCreateKernel(program, "ShurA", &err);
 
 
 	// Create the input and output arrays in device memory for our calculation
-	d_a = clCreateBuffer(context,  CL_MEM_USE_HOST_PTR , bytes, h_a, NULL);
-	d_b = clCreateBuffer(context,  CL_MEM_USE_HOST_PTR , bytes, h_b, NULL);
-	d_c = clCreateBuffer(context,  CL_MEM_USE_HOST_PTR , bytes, h_c, NULL);
+	d_jx = clCreateBuffer(context,  CL_MEM_USE_HOST_PTR , bytes, h_jx, NULL);
+	d_jy = clCreateBuffer(context,  CL_MEM_USE_HOST_PTR , bytes, h_jy, NULL);
+	d_jz = clCreateBuffer(context,  CL_MEM_USE_HOST_PTR , bytes, h_jz, NULL);
+
+	d_ju = clCreateBuffer(context,  CL_MEM_USE_HOST_PTR , bytes, h_ju, NULL);
+	d_jv = clCreateBuffer(context,  CL_MEM_USE_HOST_PTR , bytes, h_jv, NULL);
+	d_jw = clCreateBuffer(context,  CL_MEM_USE_HOST_PTR , bytes, h_jw, NULL);
+
+	d_gx = clCreateBuffer(context,  CL_MEM_USE_HOST_PTR , bytes, h_gx, NULL);
+	d_gy = clCreateBuffer(context,  CL_MEM_USE_HOST_PTR , bytes, h_gy, NULL);
+	d_gz = clCreateBuffer(context,  CL_MEM_USE_HOST_PTR , bytes, h_gz, NULL);
+
+	d_vx = clCreateBuffer(context,  CL_MEM_USE_HOST_PTR , bytes, h_vx, NULL);
+	d_vy = clCreateBuffer(context,  CL_MEM_USE_HOST_PTR , bytes, h_vy, NULL);
+	d_vz = clCreateBuffer(context,  CL_MEM_USE_HOST_PTR , bytes, h_vz, NULL);
+
+	d_ox = clCreateBuffer(context,  CL_MEM_USE_HOST_PTR , bytes, h_ox, NULL);
+	d_oy = clCreateBuffer(context,  CL_MEM_USE_HOST_PTR , bytes, h_oy, NULL);
+	d_oz = clCreateBuffer(context,  CL_MEM_USE_HOST_PTR , bytes, h_oz, NULL);
 
 	// Write our data set into the input array in device memory
-	err = clEnqueueWriteBuffer(queue, d_a, CL_TRUE, 0, bytes, h_a, 0, NULL, NULL);
-	err = clEnqueueWriteBuffer(queue, d_b, CL_TRUE, 0, bytes, h_b, 0, NULL, NULL);
+	err = clEnqueueWriteBuffer(queue, d_jx, CL_TRUE, 0, bytes, h_jx, 0, NULL, NULL);
+	err = clEnqueueWriteBuffer(queue, d_jy, CL_TRUE, 0, bytes, h_jy, 0, NULL, NULL);
+	err = clEnqueueWriteBuffer(queue, d_jz, CL_TRUE, 0, bytes, h_jz, 0, NULL, NULL);
+
+	err = clEnqueueWriteBuffer(queue, d_ju, CL_TRUE, 0, bytes, h_ju, 0, NULL, NULL);
+	err = clEnqueueWriteBuffer(queue, d_jv, CL_TRUE, 0, bytes, h_jv, 0, NULL, NULL);
+	err = clEnqueueWriteBuffer(queue, d_jw, CL_TRUE, 0, bytes, h_jw, 0, NULL, NULL);
+
+	err = clEnqueueWriteBuffer(queue, d_gx, CL_TRUE, 0, bytes, h_gx, 0, NULL, NULL);
+	err = clEnqueueWriteBuffer(queue, d_gy, CL_TRUE, 0, bytes, h_gy, 0, NULL, NULL);
+	err = clEnqueueWriteBuffer(queue, d_gz, CL_TRUE, 0, bytes, h_gz, 0, NULL, NULL);
+
+
+
 
 	// Set the arguments to our compute kernel
-	err  = clSetKernelArg(kernel, 0, sizeof(cl_mem), &d_a);
-	err |= clSetKernelArg(kernel, 1, sizeof(cl_mem), &d_b);
-	err |= clSetKernelArg(kernel, 2, sizeof(cl_mem), &d_c);
-	err |= clSetKernelArg(kernel, 3, sizeof(unsigned int), &n);
+	err = clSetKernelArg(kernel, 0, sizeof(cl_mem), &d_jx);
+	err = clSetKernelArg(kernel, 1, sizeof(cl_mem), &d_jy);
+	err = clSetKernelArg(kernel, 2, sizeof(cl_mem), &d_jz);
+
+	err = clSetKernelArg(kernel, 3, sizeof(cl_mem), &d_ju);
+	err = clSetKernelArg(kernel, 4, sizeof(cl_mem), &d_jv);
+	err = clSetKernelArg(kernel, 5, sizeof(cl_mem), &d_jw);
+
+	err = clSetKernelArg(kernel, 6, sizeof(cl_mem), &d_gx);
+	err = clSetKernelArg(kernel, 7, sizeof(cl_mem), &d_gy);
+	err = clSetKernelArg(kernel, 8, sizeof(cl_mem), &d_gz);
+
+	err = clSetKernelArg(kernel, 9, sizeof(cl_mem), &d_vx);
+	err = clSetKernelArg(kernel, 10, sizeof(cl_mem), &d_vy);
+	err = clSetKernelArg(kernel, 11, sizeof(cl_mem), &d_vz);
+
+	err = clSetKernelArg(kernel, 12, sizeof(cl_mem), &d_ox);
+	err = clSetKernelArg(kernel, 13, sizeof(cl_mem), &d_oy);
+	err = clSetKernelArg(kernel, 14, sizeof(cl_mem), &d_oz);
+	err = clSetKernelArg(kernel, 15, sizeof(unsigned int), &contacts);
 
 	// Execute the kernel over the entire range of the data set
 	err = clEnqueueNDRangeKernel(queue, kernel, 1, NULL, &globalSize, &localSize, 0, NULL, NULL);
@@ -197,14 +274,14 @@ int main(int argc, char *argv[]) {
 	double end = omp_get_wtime();
 	clWaitForEvents(1, &prof_event);
 	// Read the results from the device
-	clEnqueueReadBuffer(queue, d_c, CL_TRUE, 0, bytes, h_c, 0, NULL, NULL);
+	//clEnqueueReadBuffer(queue, d_c, CL_TRUE, 0, bytes, h_c, 0, NULL, NULL);
 
 	//Sum up vector c and print result divided by n, this should equal 1 within error
-	double sum = 0;
-	for (i = 0; i < n; i++) {
-		sum += h_c[i];
-	}
-	printf("final result: %f\n", sum / n);
+	// double sum = 0;
+	// for (i = 0; i < n; i++) {
+	// 	sum += h_c[i];
+	// }
+	// printf("final result: %f\n", sum / n);
 	cl_ulong time_start, time_end;
 	double total_time;
 	clGetEventProfilingInfo(prof_event, CL_PROFILING_COMMAND_START, sizeof(time_start), &time_start, NULL);
@@ -213,18 +290,50 @@ int main(int argc, char *argv[]) {
 	printf("\nExecution time in milliseconds = %0.3f ms |  %0.3f ms\n", (total_time / 1000000.0), (end - start) * 1000);
 
 	// release OpenCL resources
-	clReleaseMemObject(d_a);
-	clReleaseMemObject(d_b);
-	clReleaseMemObject(d_c);
+	clReleaseMemObject(d_jx);
+	clReleaseMemObject(d_jy);
+	clReleaseMemObject(d_jz);
+
+	clReleaseMemObject(d_ju);
+	clReleaseMemObject(d_jv);
+	clReleaseMemObject(d_jw);
+
+	clReleaseMemObject(d_gx);
+	clReleaseMemObject(d_gy);
+	clReleaseMemObject(d_gz);
+
+	clReleaseMemObject(d_vx);
+	clReleaseMemObject(d_vy);
+	clReleaseMemObject(d_vz);
+
+	clReleaseMemObject(d_ox);
+	clReleaseMemObject(d_oy);
+	clReleaseMemObject(d_oz);
+
 	clReleaseProgram(program);
 	clReleaseKernel(kernel);
 	clReleaseCommandQueue(queue);
 	clReleaseContext(context);
 
 	//release host memory
-	free(h_a);
-	free(h_b);
-	free(h_c);
+	free(h_jx);
+	free(h_jy);
+	free(h_jz);
 
+	free(h_ju);
+	free(h_jv);
+	free(h_jw);
+
+	free(h_gx);
+	free(h_gy);
+	free(h_gz);
+
+	free(h_vx);
+	free(h_vy);
+	free(h_vz);
+
+	free(h_ox);
+	free(h_oy);
+	free(h_oz);
 	return 0;
 }
