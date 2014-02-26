@@ -66,13 +66,13 @@ std::vector<cl_platform_id> GetPlatforms() {
 		std::cerr << "No OpenCL platform found" << std::endl;
 		exit(1);
 	} else {
-		std::cout << "Found " << platformIdCount << " platform(s)" << std::endl;
+		//std::cout << "Found " << platformIdCount << " platform(s)" << std::endl;
 	}
 	std::vector<cl_platform_id> platformIds(platformIdCount);
 	clGetPlatformIDs(platformIdCount, platformIds.data(), nullptr);
 
 	for (cl_uint i = 0; i < platformIdCount; ++i) {
-		std::cout << "\t (" << (i + 1) << ") : " << GetPlatformName(platformIds[i]) << std::endl;
+		//std::cout << "\t (" << (i + 1) << ") : " << GetPlatformName(platformIds[i]) << std::endl;
 	}
 	return platformIds;
 }
@@ -85,14 +85,14 @@ std::vector<cl_device_id> GetDevices(cl_platform_id platform) {
 		std::cerr << "No OpenCL devices found" << std::endl;
 		exit(1);
 	} else {
-		std::cout << "Found " << deviceIdCount << " device(s)" << std::endl;
+		//std::cout << "Found " << deviceIdCount << " device(s)" << std::endl;
 	}
 
 	std::vector<cl_device_id> deviceIds(deviceIdCount);
 	clGetDeviceIDs(platform, CL_DEVICE_TYPE_ALL, deviceIdCount, deviceIds.data(), nullptr);
 
 	for (cl_uint i = 0; i < deviceIdCount; ++i) {
-		std::cout << "\t (" << (i + 1) << ") : " << GetDeviceName(deviceIds[i]) << std::endl;
+		//std::cout << "\t (" << (i + 1) << ") : " << GetDeviceName(deviceIds[i]) << std::endl;
 	}
 	return deviceIds;
 }
@@ -181,7 +181,7 @@ int main(int argc, char *argv[]) {
 
 	cl_device_partition_property props[3];
 	props[0] = CL_DEVICE_PARTITION_EQUALLY;  // Equally
-	props[1] = 1;                            // 4 compute units per sub-device
+	props[1] = 64;                            // 4 compute units per sub-device
 	props[2] = 0;                            // End of the property list
 	cl_uint subdevicecount = 0;
 	err = clCreateSubDevices (maindeviceIds[device_num], props, num_entries, deviceIds, &subdevicecount);
@@ -199,7 +199,7 @@ int main(int argc, char *argv[]) {
 	program = CreateProgram(LoadKernel("kernel.cl"), context);
 
 	// Build the program executable
-	clBuildProgram(program, 1, &deviceIds[device_num], "-cl-mad-enable", NULL, NULL);
+	clBuildProgram(program, 1, &deviceIds[device_num], "-cl-unsafe-math-optimizations", NULL, NULL);
 	size_t len = 0;
 	clGetProgramBuildInfo(program, deviceIds[device_num], CL_PROGRAM_BUILD_LOG, NULL, NULL, &len);
 	char *log = new char[len]; //or whatever you use
@@ -250,6 +250,11 @@ int main(int argc, char *argv[]) {
 	// Wait for the command queue to get serviced before reading back results
 	clFinish(queue);
 
+	double timer_omp = 0;
+	double timer_ocl = 0;
+	double flop_rate = 0;
+
+	for(int iter = 0; iter<10; iter++){
 	double start = omp_get_wtime();
 	// Execute the kernel over the entire range of the data set
 	err = clEnqueueNDRangeKernel(queue, kernel, 1, NULL, &globalSize, &localSize, 0, NULL, &prof_event);
@@ -273,7 +278,11 @@ int main(int argc, char *argv[]) {
 	clGetEventProfilingInfo(prof_event, CL_PROFILING_COMMAND_START, sizeof(time_start), &time_start, NULL);
 	clGetEventProfilingInfo(prof_event, CL_PROFILING_COMMAND_END, sizeof(time_end), &time_end, NULL);
 	total_time = time_end - time_start;
-	printf("\nExecution time in milliseconds = %0.3f ms |  %0.3f ms  | %0.3f Giga flops\n", (total_time / 1000000.0), (end - start)*1000 ,(85*contacts)/(total_time / 1000000.0/1000.0)/(1e9));
+	timer_ocl +=(total_time / 1000000.0);
+	timer_omp +=(end - start)*1000;
+	flop_rate+=(60*contacts)/(total_time / 1000000.0/1000.0)/(1e9);
+	}
+	printf("\nExecution time in milliseconds = %0.3f ms |  %0.3f ms  | %0.3f Giga flops\n", timer_ocl/10.0, timer_omp/10.0 ,flop_rate/10.0);
 
 	// release OpenCL resources
 	clReleaseMemObject(d_jxyzA);
