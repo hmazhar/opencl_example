@@ -108,26 +108,26 @@ for(int id=0; id<n_contact; id++){
         float gam_x = gamma_x[id];
         float gam_y = gamma_y[id];
         float gam_z = gamma_z[id];
+        unsigned int c2 = n_contact*2;
+        out_velocity_xA[id]= JxA[id]*gam_x+JxA[id+n_contact]*gam_y+JxA[id+c2]*gam_z;
+        out_velocity_yA[id]= JyA[id]*gam_x+JyA[id+n_contact]*gam_y+JyA[id+c2]*gam_z;
+        out_velocity_zA[id]= JzA[id]*gam_x+JzA[id+n_contact]*gam_y+JzA[id+c2]*gam_z;
 
-        out_velocity_xA[id]= JxA[id+n_contact*0]*gam_x+JxA[id+n_contact*1]*gam_y+JxA[id+n_contact*2]*gam_z;
-        out_velocity_yA[id]= JyA[id+n_contact*0]*gam_x+JyA[id+n_contact*1]*gam_y+JyA[id+n_contact*2]*gam_z;
-        out_velocity_zA[id]= JzA[id+n_contact*0]*gam_x+JzA[id+n_contact*1]*gam_y+JzA[id+n_contact*2]*gam_z;
+        out_omega_xA[id]= JuA[id]*gam_x+JuA[id+n_contact]*gam_y+JuA[id+c2]*gam_z;
+        out_omega_yA[id]= JvA[id]*gam_x+JvA[id+n_contact]*gam_y+JvA[id+c2]*gam_z;
+        out_omega_zA[id]= JwA[id]*gam_x+JwA[id+n_contact]*gam_y+JwA[id+c2]*gam_z;
 
-        out_omega_xA[id]= JuA[id+n_contact*0]*gam_x+JuA[id+n_contact*1]*gam_y+JuA[id+n_contact*2]*gam_z;
-        out_omega_yA[id]= JvA[id+n_contact*0]*gam_x+JvA[id+n_contact*1]*gam_y+JvA[id+n_contact*2]*gam_z;
-        out_omega_zA[id]= JwA[id+n_contact*0]*gam_x+JwA[id+n_contact*1]*gam_y+JwA[id+n_contact*2]*gam_z;
+        out_velocity_xB[id]= JxB[id]*gam_x+JxB[id+n_contact]*gam_y+JxB[id+c2]*gam_z;
+        out_velocity_yB[id]= JyB[id]*gam_x+JyB[id+n_contact]*gam_y+JyB[id+c2]*gam_z;
+        out_velocity_zB[id]= JzB[id]*gam_x+JzB[id+n_contact]*gam_y+JzB[id+c2]*gam_z;
 
-        out_velocity_xB[id]= JxB[id+n_contact*0]*gam_x+JxB[id+n_contact*1]*gam_y+JxB[id+n_contact*2]*gam_z;
-        out_velocity_yB[id]= JyB[id+n_contact*0]*gam_x+JyB[id+n_contact*1]*gam_y+JyB[id+n_contact*2]*gam_z;
-        out_velocity_zB[id]= JzB[id+n_contact*0]*gam_x+JzB[id+n_contact*1]*gam_y+JzB[id+n_contact*2]*gam_z;
-
-        out_omega_xB[id]= JuB[id+n_contact*0]*gam_x+JuB[id+n_contact*1]*gam_y+JuB[id+n_contact*2]*gam_z;
-        out_omega_yB[id]= JvB[id+n_contact*0]*gam_x+JvB[id+n_contact*1]*gam_y+JvB[id+n_contact*2]*gam_z;
-        out_omega_zB[id]= JwB[id+n_contact*0]*gam_x+JwB[id+n_contact*1]*gam_y+JwB[id+n_contact*2]*gam_z;
+        out_omega_xB[id]= JuB[id]*gam_x+JuB[id+n_contact]*gam_y+JuB[id+c2]*gam_z;
+        out_omega_yB[id]= JvB[id]*gam_x+JvB[id+n_contact]*gam_y+JvB[id+c2]*gam_z;
+        out_omega_zB[id]= JwB[id]*gam_x+JwB[id+n_contact]*gam_y+JwB[id+c2]*gam_z;
 
 }
 double end = omp_get_wtime();
-printf("Time: \t %f \n", (end-start)*1000); 
+printf("Time: \t %f \t %f Gflops\n", (end-start)*1000, (85*n_contact)/((end-start))/(1e9)); 
 
     //release host memory
     free(JxA           );

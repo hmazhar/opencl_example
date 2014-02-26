@@ -256,7 +256,7 @@ int main(int argc, char *argv[]) {
 	clGetEventProfilingInfo(prof_event, CL_PROFILING_COMMAND_START, sizeof(time_start), &time_start, NULL);
 	clGetEventProfilingInfo(prof_event, CL_PROFILING_COMMAND_END, sizeof(time_end), &time_end, NULL);
 	total_time = time_end - time_start;
-	printf("\nExecution time in milliseconds = %0.3f ms |  %0.3f ms  | %0.3f Giga flops\n", (total_time / 1000000.0), (end - start)*1000 ,(29*contacts)/(end - start)/(1e9));
+	printf("\nExecution time in milliseconds = %0.3f ms |  %0.3f ms  | %0.3f Giga flops\n", (total_time / 1000000.0), (end - start)*1000 ,(85*contacts)/(total_time / 1000000.0/1000.0)/(1e9));
 
 	// release OpenCL resources
 	clReleaseMemObject(d_jxyzA);
