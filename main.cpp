@@ -282,10 +282,10 @@ int main(int argc, char *argv[]) {
 	timer_ocl +=(total_time / 1000000.0);
 	timer_omp +=(end - start)*1000;
 	flop_rate+=(60*contacts)/(total_time / 1000000.0/1000.0)/(1e9);
-	bandwidth+=(168*contacts)/(total_time / 1000000.0/1000.0)/(1e9);
+	bandwidth+=(204*contacts)/(total_time / 1000000.0/1000.0)/(1e9);
 
 	}
-	printf("\nExecution time in milliseconds = %0.3f ms |  %0.3f ms  | %0.3f Gflops| %0.3f Bwidth\n", timer_ocl/10.0, timer_omp/10.0 ,flop_rate/10.0, bandwidth/10.0);
+	printf("\nExecution time in milliseconds = %0.3f ms |  %0.3f ms  | %0.3f Gflops| %0.3f GB/s\n", timer_ocl/10.0, timer_omp/10.0 ,flop_rate/10.0, bandwidth/10.0);
 
 	// release OpenCL resources
 	clReleaseMemObject(d_jxyzA);
