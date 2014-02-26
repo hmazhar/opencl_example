@@ -111,7 +111,8 @@ int main(int argc, char *argv[]) {
 	unsigned int constraints = contacts*3;
 
 	std::vector<cl_platform_id> platformIds;     // OpenCL platform
-	std::vector<cl_device_id> deviceIds;         // device ID
+	std::vector<cl_device_id> maindeviceIds;         // device ID
+	//std::vector<cl_device_id> deviceIds;         // device ID
 	cl_context context;                          // context
 	cl_command_queue queue;                      // command queue
 	cl_program program;                          // program
@@ -170,10 +171,26 @@ int main(int argc, char *argv[]) {
 	// Bind to platform
 	platformIds = GetPlatforms();
 	// Get ID for the device
-	deviceIds = GetDevices(platformIds[0]);
+	maindeviceIds = GetDevices(platformIds[0]);
+
+	cl_uint maxSubDevices;
+	err = clGetDeviceInfo(maindeviceIds[device_num], CL_DEVICE_PARTITION_MAX_SUB_DEVICES, sizeof(maxSubDevices), &maxSubDevices, NULL);
+	cout<<maxSubDevices<<endl;
+	cl_device_id deviceIds[8];
+	cl_uint num_entries = 8;
+
+	cl_device_partition_property props[3];
+	props[0] = CL_DEVICE_PARTITION_EQUALLY;  // Equally
+	props[1] = 1;                            // 4 compute units per sub-device
+	props[2] = 0;                            // End of the property list
+	cl_uint subdevicecount = 0;
+	err = clCreateSubDevices (maindeviceIds[device_num], props, num_entries, deviceIds, &subdevicecount);
+	cout<<subdevicecount<<endl;
+	CheckError(err);
+
 
 	// Create a context
-	context = clCreateContext(0, 1, &deviceIds[device_num], NULL, NULL, &err);
+	context = clCreateContext(0, 1, deviceIds, NULL, NULL, &err);
 
 	// Create a command queue
 	queue = clCreateCommandQueue(context, deviceIds[device_num], CL_QUEUE_PROFILING_ENABLE, &err);
