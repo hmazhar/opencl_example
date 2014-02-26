@@ -1,7 +1,7 @@
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 __kernel void vecMathA(__global double *a, __global double *b, __global double *c, const unsigned int n)
 {
-    int id = get_global_id(0);
+    const unsigned int id = get_global_id(0);
     if (id < n){
     	double _a_ = a[id];
     	double _b_ = b[id];
@@ -19,7 +19,7 @@ __kernel void vecMathA(__global double *a, __global double *b, __global double *
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 __kernel void vecMathB(__global double *a, __global double *b, __global double *c, const unsigned int n)
 {
-    int id = get_global_id(0);
+    const unsigned int id = get_global_id(0);
     if (id < n){
 		for(int i=0; i<100; i++){
 			double _a = a[id] + b[id] * b[id] +(a[id] * b[id])/b[id];
@@ -34,36 +34,19 @@ __kernel void vecMathB(__global double *a, __global double *b, __global double *
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 __kernel void ShurA(
-	__global float *Jx, 
-	__global float *Jy, 
-	__global float *Jz, 
-	__global float *Ju, 
-	__global float *Jv, 
-	__global float *Jw, 
-	__global float *gamma_x, 
-	__global float *gamma_y, 
-	__global float *gamma_z,
-	__global float *out_velocity_x, 
-	__global float *out_velocity_y, 
-	__global float *out_velocity_z,
-	__global float *out_omega_x, 
-	__global float *out_omega_y, 
-	__global float *out_omega_z,
+	__global float3 *Jxyz, 
+	__global float3 *Juvw, 
+	__global float3 *gamma, 
+	__global float3 *out_velocity, 
+	__global float3 *out_omega, 
 	const unsigned int n_contact)
 {
-    int id = get_global_id(0);
+    const unsigned int id = get_global_id(0);
     if (id < n_contact){
-    	float gam_x = gamma_x[id];
-    	float gam_y = gamma_y[id];
-    	float gam_z = gamma_z[id];
+    	float3 gam = gamma[id];
 
-    	out_velocity_x[id]= Jx[id+n_contact*0]*gam_x+Jx[id+n_contact*1]*gam_y+Jx[id+n_contact*2]*gam_z;
-    	out_velocity_y[id]= Jy[id+n_contact*0]*gam_x+Jy[id+n_contact*1]*gam_y+Jy[id+n_contact*2]*gam_z;
-    	out_velocity_z[id]= Jz[id+n_contact*0]*gam_x+Jz[id+n_contact*1]*gam_y+Jz[id+n_contact*2]*gam_z;
-
-    	out_omega_x[id]= Ju[id+n_contact*0]*gam_x+Ju[id+n_contact*1]*gam_y+Ju[id+n_contact*2]*gam_z;
-    	out_omega_y[id]= Jv[id+n_contact*0]*gam_x+Jv[id+n_contact*1]*gam_y+Jv[id+n_contact*2]*gam_z;
-    	out_omega_z[id]= Jw[id+n_contact*0]*gam_x+Jw[id+n_contact*1]*gam_y+Jw[id+n_contact*2]*gam_z;
+    	out_velocity[id]= Jxyz[id+n_contact*0]*gam.x+Jxyz[id+n_contact*1]*gam.y+Jxyz[id+n_contact*2]*gam.z;
+    	out_omega[id]= Juvw[id+n_contact*0]*gam.x+Juvw[id+n_contact*1]*gam.y+Juvw[id+n_contact*2]*gam.z;
     }
 }
 
