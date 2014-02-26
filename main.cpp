@@ -253,6 +253,7 @@ int main(int argc, char *argv[]) {
 	double timer_omp = 0;
 	double timer_ocl = 0;
 	double flop_rate = 0;
+	double bandwidth = 0;
 
 	for(int iter = 0; iter<10; iter++){
 	double start = omp_get_wtime();
@@ -281,8 +282,10 @@ int main(int argc, char *argv[]) {
 	timer_ocl +=(total_time / 1000000.0);
 	timer_omp +=(end - start)*1000;
 	flop_rate+=(60*contacts)/(total_time / 1000000.0/1000.0)/(1e9);
+	bandwidth+=(168*contacts)/(total_time / 1000000.0/1000.0)/(1e9);
+
 	}
-	printf("\nExecution time in milliseconds = %0.3f ms |  %0.3f ms  | %0.3f Giga flops\n", timer_ocl/10.0, timer_omp/10.0 ,flop_rate/10.0);
+	printf("\nExecution time in milliseconds = %0.3f ms |  %0.3f ms  | %0.3f Gflops| %0.3f Bwidth\n", timer_ocl/10.0, timer_omp/10.0 ,flop_rate/10.0, bandwidth/10.0);
 
 	// release OpenCL resources
 	clReleaseMemObject(d_jxyzA);
