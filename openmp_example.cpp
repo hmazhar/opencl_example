@@ -17,10 +17,14 @@ if(argc>1){
 
     thread_num = atoi(argv[1]);
 }
+    unsigned int contacts = 1024000/2;
+    if (argc > 2) {
+        contacts = atoi(argv[2]);
+    }
 
 omp_set_num_threads(thread_num);
 	// Length of vectors
-    unsigned int contacts = 1024000/2;
+
     unsigned int constraints = contacts*3;
  
     // Host input vectors

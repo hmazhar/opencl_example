@@ -98,7 +98,16 @@ std::vector<cl_device_id> GetDevices(cl_platform_id platform) {
 }
 
 int main(int argc, char *argv[]) {
+	int device_num = 0;
+	
+	if (argc > 1) {
+		device_num = atoi(argv[1]);
+	}
 	unsigned int contacts = 1024000/2;
+	if (argc > 2) {
+		contacts = atoi(argv[2]);
+	}
+	
 	unsigned int constraints = contacts*3;
 
 	std::vector<cl_platform_id> platformIds;     // OpenCL platform
@@ -110,10 +119,7 @@ int main(int argc, char *argv[]) {
 	cl_event prof_event;
 	cl_uint deviceIdCount = 0;
 
-	int device_num = 0;
-	if (argc > 1) {
-		device_num = atoi(argv[1]);
-	}
+	
 
 	// Size, in bytes, of each vector
 	size_t bytes = constraints * sizeof(cl_float3);
