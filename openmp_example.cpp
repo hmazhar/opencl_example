@@ -24,37 +24,37 @@ omp_set_num_threads(thread_num);
     unsigned int constraints = contacts*3;
  
     // Host input vectors
-    double *Jx, *Jy, *Jz;
-    double *Ju, *Jv, *Jw;
-    double *gamma_x, *gamma_y, *gamma_z;
+    float *Jx, *Jy, *Jz;
+    float *Ju, *Jv, *Jw;
+    float *gamma_x, *gamma_y, *gamma_z;
 // Host output vectors
-    double *out_velocity_x, *out_velocity_y, *out_velocity_z;
-    double *out_omega_x, *out_omega_y, *out_omega_z;
+    float *out_velocity_x, *out_velocity_y, *out_velocity_z;
+    float *out_omega_x, *out_omega_y, *out_omega_z;
  
 
     // Size, in bytes, of each vector
-    size_t bytes = constraints*sizeof(double);
+    size_t bytes = constraints*sizeof(float);
  
     // Allocate memory for each vector on host
-    Jx              = (double*) malloc(bytes);
-    Jy              = (double*) malloc(bytes);
-    Jz              = (double*) malloc(bytes);
+    Jx              = (float*) malloc(bytes);
+    Jy              = (float*) malloc(bytes);
+    Jz              = (float*) malloc(bytes);
 
-    Ju              = (double*) malloc(bytes);
-    Jv              = (double*) malloc(bytes);
-    Jw              = (double*) malloc(bytes);
+    Ju              = (float*) malloc(bytes);
+    Jv              = (float*) malloc(bytes);
+    Jw              = (float*) malloc(bytes);
 
-    gamma_x         = (double*) malloc(bytes);
-    gamma_y         = (double*) malloc(bytes);
-    gamma_z         = (double*) malloc(bytes);
+    gamma_x         = (float*) malloc(bytes);
+    gamma_y         = (float*) malloc(bytes);
+    gamma_z         = (float*) malloc(bytes);
 
-    out_velocity_x  = (double*) malloc(bytes);
-    out_velocity_y  = (double*) malloc(bytes);
-    out_velocity_z  = (double*) malloc(bytes);
+    out_velocity_x  = (float*) malloc(bytes);
+    out_velocity_y  = (float*) malloc(bytes);
+    out_velocity_z  = (float*) malloc(bytes);
 
-    out_omega_x     = (double*) malloc(bytes);
-    out_omega_y     = (double*) malloc(bytes);
-    out_omega_z     = (double*) malloc(bytes);
+    out_omega_x     = (float*) malloc(bytes);
+    out_omega_y     = (float*) malloc(bytes);
+    out_omega_z     = (float*) malloc(bytes);
  
     // Initialize vectors on host
     int i;
@@ -78,9 +78,9 @@ double start = omp_get_wtime();
 #pragma omp parallel for
 for(int id=0; id<n_contact; id++){
 
-        double gam_x = gamma_x[id];
-        double gam_y = gamma_y[id];
-        double gam_z = gamma_z[id];
+        float gam_x = gamma_x[id];
+        float gam_y = gamma_y[id];
+        float gam_z = gamma_z[id];
 
         out_velocity_x[id]= Jx[id+n_contact*0]*gam_x+Jx[id+n_contact*1]*gam_y+Jx[id+n_contact*2]*gam_z;
         out_velocity_y[id]= Jy[id+n_contact*0]*gam_x+Jy[id+n_contact*1]*gam_y+Jy[id+n_contact*2]*gam_z;

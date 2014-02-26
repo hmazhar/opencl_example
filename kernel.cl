@@ -34,28 +34,28 @@ __kernel void vecMathB(__global double *a, __global double *b, __global double *
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 __kernel void ShurA(
-	__global double *Jx, 
-	__global double *Jy, 
-	__global double *Jz, 
-	__global double *Ju, 
-	__global double *Jv, 
-	__global double *Jw, 
-	__global double *gamma_x, 
-	__global double *gamma_y, 
-	__global double *gamma_z,
-	__global double *out_velocity_x, 
-	__global double *out_velocity_y, 
-	__global double *out_velocity_z,
-	__global double *out_omega_x, 
-	__global double *out_omega_y, 
-	__global double *out_omega_z,
+	__global float *Jx, 
+	__global float *Jy, 
+	__global float *Jz, 
+	__global float *Ju, 
+	__global float *Jv, 
+	__global float *Jw, 
+	__global float *gamma_x, 
+	__global float *gamma_y, 
+	__global float *gamma_z,
+	__global float *out_velocity_x, 
+	__global float *out_velocity_y, 
+	__global float *out_velocity_z,
+	__global float *out_omega_x, 
+	__global float *out_omega_y, 
+	__global float *out_omega_z,
 	const unsigned int n_contact)
 {
     int id = get_global_id(0);
     if (id < n_contact){
-    	double gam_x = gamma_x[id];
-    	double gam_y = gamma_y[id];
-    	double gam_z = gamma_z[id];
+    	float gam_x = gamma_x[id];
+    	float gam_y = gamma_y[id];
+    	float gam_z = gamma_z[id];
 
     	out_velocity_x[id]= Jx[id+n_contact*0]*gam_x+Jx[id+n_contact*1]*gam_y+Jx[id+n_contact*2]*gam_z;
     	out_velocity_y[id]= Jy[id+n_contact*0]*gam_x+Jy[id+n_contact*1]*gam_y+Jy[id+n_contact*2]*gam_z;

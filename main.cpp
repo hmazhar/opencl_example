@@ -101,12 +101,12 @@ int main(int argc, char *argv[]) {
 	unsigned int contacts = 1024000*3;
 	unsigned int constraints = contacts*3;
 
-	double *h_jx, *h_jy, *h_jz;
-	double *h_ju, *h_jv, *h_jw;
-	double *h_gx, *h_gy, *h_gz;
+	float *h_jx, *h_jy, *h_jz;
+	float *h_ju, *h_jv, *h_jw;
+	float *h_gx, *h_gy, *h_gz;
 
-	double *h_vx, *h_vy, *h_vz;
-	double *h_ox, *h_oy, *h_oz;
+	float *h_vx, *h_vy, *h_vz;
+	float *h_ox, *h_oy, *h_oz;
 
 	cl_mem d_jx, d_jy, d_jz;
 	cl_mem d_ju, d_jv, d_jw;
@@ -130,28 +130,28 @@ int main(int argc, char *argv[]) {
 	}
 
 	// Size, in bytes, of each vector
-	size_t bytes = constraints * sizeof(double);
+	size_t bytes = constraints * sizeof(float);
 
 	// Allocate memory for each vector on host
-	h_jx = (double*) malloc(bytes);
-	h_jy = (double*) malloc(bytes);
-	h_jz = (double*) malloc(bytes);
+	h_jx = (float*) malloc(bytes);
+	h_jy = (float*) malloc(bytes);
+	h_jz = (float*) malloc(bytes);
 
-	h_ju = (double*) malloc(bytes);
-	h_jv = (double*) malloc(bytes);
-	h_jw = (double*) malloc(bytes);
+	h_ju = (float*) malloc(bytes);
+	h_jv = (float*) malloc(bytes);
+	h_jw = (float*) malloc(bytes);
 
-	h_gx = (double*) malloc(bytes);
-	h_gy = (double*) malloc(bytes);
-	h_gz = (double*) malloc(bytes);
+	h_gx = (float*) malloc(bytes);
+	h_gy = (float*) malloc(bytes);
+	h_gz = (float*) malloc(bytes);
 
-	h_vx = (double*) malloc(bytes);
-	h_vy = (double*) malloc(bytes);
-	h_vz = (double*) malloc(bytes);
+	h_vx = (float*) malloc(bytes);
+	h_vy = (float*) malloc(bytes);
+	h_vz = (float*) malloc(bytes);
 
-	h_ox = (double*) malloc(bytes);
-	h_oy = (double*) malloc(bytes);
-	h_oz = (double*) malloc(bytes);
+	h_ox = (float*) malloc(bytes);
+	h_oy = (float*) malloc(bytes);
+	h_oz = (float*) malloc(bytes);
 
 	// Initialize vectors on host
 	int i;
