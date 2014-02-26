@@ -34,19 +34,26 @@ __kernel void vecMathB(__global double *a, __global double *b, __global double *
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 __kernel void ShurA(
-	__global float3 *Jxyz, 
-	__global float3 *Juvw, 
+	__global float3 *JxyzA, 
+	__global float3 *JuvwA, 
+	__global float3 *JxyzB, 
+	__global float3 *JuvwB, 
 	__global float3 *gamma, 
-	__global float3 *out_velocity, 
-	__global float3 *out_omega, 
+	__global float3 *out_velocityA, 
+	__global float3 *out_omegaA, 
+	__global float3 *out_velocityB, 
+	__global float3 *out_omegaB, 
 	const unsigned int n_contact)
 {
     const unsigned int id = get_global_id(0);
     if (id < n_contact){
     	float3 gam = gamma[id];
 
-    	out_velocity[id]= Jxyz[id+n_contact*0]*gam.x+Jxyz[id+n_contact*1]*gam.y+Jxyz[id+n_contact*2]*gam.z;
-    	out_omega[id]= Juvw[id+n_contact*0]*gam.x+Juvw[id+n_contact*1]*gam.y+Juvw[id+n_contact*2]*gam.z;
+    	out_velocityA[id]= JxyzA[id+n_contact*0]*gam.x+JxyzA[id+n_contact*1]*gam.y+JxyzA[id+n_contact*2]*gam.z;
+    	out_omegaA[id]= JuvwA[id+n_contact*0]*gam.x+JuvwA[id+n_contact*1]*gam.y+JuvwA[id+n_contact*2]*gam.z;
+
+    	out_velocityB[id]= JxyzB[id+n_contact*0]*gam.x+JxyzB[id+n_contact*1]*gam.y+JxyzB[id+n_contact*2]*gam.z;
+    	out_omegaB[id]= JuvwB[id+n_contact*0]*gam.x+JuvwB[id+n_contact*1]*gam.y+JuvwB[id+n_contact*2]*gam.z;
     }
 }
 
