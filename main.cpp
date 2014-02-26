@@ -98,7 +98,7 @@ std::vector<cl_device_id> GetDevices(cl_platform_id platform) {
 }
 
 int main(int argc, char *argv[]) {
-	unsigned int contacts = 1024000*3;
+	unsigned int contacts = 1024000/2;
 	unsigned int constraints = contacts*3;
 
 	std::vector<cl_platform_id> platformIds;     // OpenCL platform
