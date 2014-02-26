@@ -124,9 +124,10 @@ int main(int argc, char *argv[]) {
 
 	// Size, in bytes, of each vector
 	size_t bytes = constraints * sizeof(cl_float3);
+	size_t bytesJ = constraints * sizeof(cl_float16);
 
 	// Allocate memory for each vector on host
-	cl_float3 * h_jxyzA = (cl_float3*) malloc(bytes*4);
+	cl_float16 * h_jxyzA = (cl_float16*) malloc(bytesJ);
 	cl_float3 * h_juvwA = (cl_float3*) malloc(bytes);
 	cl_float3 * h_jxyzB = (cl_float3*) malloc(bytes);
 	cl_float3 * h_juvwB = (cl_float3*) malloc(bytes);
@@ -137,10 +138,21 @@ int main(int argc, char *argv[]) {
 	cl_float3 * h_oB = (cl_float3*) malloc(bytes);
 
 	// Initialize vectors on host
-for (int i = 0; i < constraints*4; i++) {
+for (int i = 0; i < constraints; i++) {
 		h_jxyzA[i].s[0] = sinf(i) * sinf(i);
 		h_jxyzA[i].s[1] = sinf(i) * sinf(i);
 		h_jxyzA[i].s[2] = sinf(i) * sinf(i);
+		h_jxyzA[i].s[3] = 0;
+
+		h_jxyzA[i].s[4] = sinf(i) * sinf(i);
+		h_jxyzA[i].s[5] = sinf(i) * sinf(i);
+		h_jxyzA[i].s[6] = sinf(i) * sinf(i);
+		h_jxyzA[i].s[7] = 0;
+
+		h_jxyzA[i].s[8] = sinf(i) * sinf(i);
+		h_jxyzA[i].s[9] = sinf(i) * sinf(i);
+		h_jxyzA[i].s[10] = sinf(i) * sinf(i);
+		h_jxyzA[i].s[11] = 0;
 }
 	int i;
 	for (i = 0; i < constraints; i++) {
@@ -162,44 +174,44 @@ for (int i = 0; i < constraints*4; i++) {
 	// Get ID for the device
 	maindeviceIds = GetDevices(platformIds[0]);
 
-	cl_uint maxSubDevices;
-	err = clGetDeviceInfo(maindeviceIds[device_num], CL_DEVICE_PARTITION_MAX_SUB_DEVICES, sizeof(maxSubDevices), &maxSubDevices, NULL);
-	cout<<maxSubDevices<<endl;
-	cl_device_id deviceIds[8];
-	cl_uint num_entries = 8;
+	// cl_uint maxSubDevices;
+	// err = clGetDeviceInfo(maindeviceIds[device_num], CL_DEVICE_PARTITION_MAX_SUB_DEVICES, sizeof(maxSubDevices), &maxSubDevices, NULL);
+	// cout<<maxSubDevices<<endl;
+	// cl_device_id deviceIds[8];
+	// cl_uint num_entries = 8;
 
-	cl_device_partition_property props[3];
-	props[0] = CL_DEVICE_PARTITION_EQUALLY;  // Equally
-	props[1] = 64;                            // 4 compute units per sub-device
-	props[2] = 0;                            // End of the property list
-	cl_uint subdevicecount = 0;
-	err = clCreateSubDevices (maindeviceIds[device_num], props, num_entries, deviceIds, &subdevicecount);
-	cout<<subdevicecount<<endl;
-	CheckError(err);
+	// cl_device_partition_property props[3];
+	// props[0] = CL_DEVICE_PARTITION_EQUALLY;  // Equally
+	// props[1] = 64;                            // 4 compute units per sub-device
+	// props[2] = 0;                            // End of the property list
+	// cl_uint subdevicecount = 0;
+	// err = clCreateSubDevices (maindeviceIds[device_num], props, num_entries, deviceIds, &subdevicecount);
+	// cout<<subdevicecount<<endl;
+	// CheckError(err);
 
 
 	// Create a context
-	context = clCreateContext(0, 1, deviceIds, NULL, NULL, &err);
+	context = clCreateContext(0, 1, &maindeviceIds[device_num], NULL, NULL, &err);
 
 	// Create a command queue
-	queue = clCreateCommandQueue(context, deviceIds[device_num], CL_QUEUE_PROFILING_ENABLE, &err);
+	queue = clCreateCommandQueue(context, maindeviceIds[device_num], CL_QUEUE_PROFILING_ENABLE, &err);
 
 	// Create the compute program from the source buffer
 	program = CreateProgram(LoadKernel("kernel.cl"), context);
 
 	// Build the program executable
-	clBuildProgram(program, 1, &deviceIds[device_num], "-cl-unsafe-math-optimizations", NULL, NULL);
+	clBuildProgram(program, 1, &maindeviceIds[device_num], "-cl-unsafe-math-optimizations", NULL, NULL);
 	size_t len = 0;
-	clGetProgramBuildInfo(program, deviceIds[device_num], CL_PROGRAM_BUILD_LOG, NULL, NULL, &len);
+	clGetProgramBuildInfo(program, maindeviceIds[device_num], CL_PROGRAM_BUILD_LOG, NULL, NULL, &len);
 	char *log = new char[len]; //or whatever you use
-	clGetProgramBuildInfo(program, deviceIds[device_num], CL_PROGRAM_BUILD_LOG, len, log, NULL);
+	clGetProgramBuildInfo(program, maindeviceIds[device_num], CL_PROGRAM_BUILD_LOG, len, log, NULL);
 	printf("Build Log:\n%s\n", log);
 	// Create the compute kernel in the program we wish to run
 	kernel = clCreateKernel(program, "ShurA", &err);
 
 
 	// Create the input and output arrays in device memory for our calculation
-	cl_mem d_jxyzA = clCreateBuffer(context,  CL_MEM_USE_HOST_PTR , bytes*4, h_jxyzA, NULL);
+	cl_mem d_jxyzA = clCreateBuffer(context,  CL_MEM_USE_HOST_PTR , bytesJ, h_jxyzA, NULL);
 	cl_mem d_juvwA = clCreateBuffer(context,  CL_MEM_USE_HOST_PTR , bytes, h_juvwA, NULL);
 
 	cl_mem d_jxyzB = clCreateBuffer(context,  CL_MEM_USE_HOST_PTR , bytes, h_jxyzB, NULL);
@@ -213,7 +225,7 @@ for (int i = 0; i < constraints*4; i++) {
 	cl_mem d_oB = clCreateBuffer(context,  CL_MEM_USE_HOST_PTR , bytes, h_oB, NULL);
 
 	// Write our data set into the input array in device memory
-	err = clEnqueueWriteBuffer(queue, d_jxyzA, CL_TRUE, 0, bytes*4, h_jxyzA, 0, NULL, NULL);
+	err = clEnqueueWriteBuffer(queue, d_jxyzA, CL_TRUE, 0, bytesJ, h_jxyzA, 0, NULL, NULL);
 	err = clEnqueueWriteBuffer(queue, d_juvwA, CL_TRUE, 0, bytes, h_juvwA, 0, NULL, NULL);
 	err = clEnqueueWriteBuffer(queue, d_jxyzB, CL_TRUE, 0, bytes, h_jxyzB, 0, NULL, NULL);
 	err = clEnqueueWriteBuffer(queue, d_juvwB, CL_TRUE, 0, bytes, h_juvwB, 0, NULL, NULL);
