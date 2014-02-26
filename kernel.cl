@@ -1,9 +1,6 @@
 
 __kernel void ShurA(
-	__global float16 *JxyzA, 
-	__global float3 *JuvwA, 
-	__global float3 *JxyzB, 
-	__global float3 *JuvwB, 
+	__global float16 *JxyzA,
 	__global float3 *gamma, 
 	__global float3 *out_velocityA, 
 	__global float3 *out_omegaA, 
@@ -32,8 +29,8 @@ __kernel void ShurA(
     	//outoA.w =  C1.s7*gam.x+C2.s7*gam.y+C3.s7*gam.z;
 
 
-    	outvB.x =  C1.s8 *gam.x+C2.s8 *gam.y+C3.s8 *gam.z;
-    	outvB.y =  C1.s9 *gam.x+C2.s9 *gam.y+C3.s9 *gam.z;
+    	outvB.x =  C1.s8*gam.x+C2.s8*gam.y+C3.s8*gam.z;
+    	outvB.y =  C1.s9*gam.x+C2.s9*gam.y+C3.s9*gam.z;
     	outvB.z =  C1.sa*gam.x+C2.sa*gam.y+C3.sa*gam.z;
     	//outvB.w =  C1.sb*gam.x+C2.sb*gam.y+C3.sb*gam.z;
 
