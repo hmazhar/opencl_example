@@ -126,7 +126,7 @@ int main(int argc, char *argv[]) {
 	size_t bytes = constraints * sizeof(cl_float3);
 
 	// Allocate memory for each vector on host
-	cl_float3 * h_jxyzA = (cl_float3*) malloc(bytes);
+	cl_float3 * h_jxyzA = (cl_float3*) malloc(bytes*4);
 	cl_float3 * h_juvwA = (cl_float3*) malloc(bytes);
 	cl_float3 * h_jxyzB = (cl_float3*) malloc(bytes);
 	cl_float3 * h_juvwB = (cl_float3*) malloc(bytes);
@@ -137,24 +137,13 @@ int main(int argc, char *argv[]) {
 	cl_float3 * h_oB = (cl_float3*) malloc(bytes);
 
 	// Initialize vectors on host
-	int i;
-	for (i = 0; i < constraints; i++) {
+for (int i = 0; i < constraints*4; i++) {
 		h_jxyzA[i].s[0] = sinf(i) * sinf(i);
 		h_jxyzA[i].s[1] = sinf(i) * sinf(i);
 		h_jxyzA[i].s[2] = sinf(i) * sinf(i);
-
-		h_juvwA[i].s[0] = sinf(i) * sinf(i);
-		h_juvwA[i].s[1] = sinf(i) * sinf(i);
-		h_juvwA[i].s[2] = sinf(i) * sinf(i);
-
-		h_jxyzB[i].s[0] = sinf(i) * sinf(i);
-		h_jxyzB[i].s[1] = sinf(i) * sinf(i);
-		h_jxyzB[i].s[2] = sinf(i) * sinf(i);
-
-		h_juvwB[i].s[0] = sinf(i) * sinf(i);
-		h_juvwB[i].s[1] = sinf(i) * sinf(i);
-		h_juvwB[i].s[2] = sinf(i) * sinf(i);
-
+}
+	int i;
+	for (i = 0; i < constraints; i++) {
 		h_g[i].s[0] = sinf(i) * sinf(i);
 		h_g[i].s[1] = sinf(i) * sinf(i);
 		h_g[i].s[2] = sinf(i) * sinf(i);
@@ -210,7 +199,7 @@ int main(int argc, char *argv[]) {
 
 
 	// Create the input and output arrays in device memory for our calculation
-	cl_mem d_jxyzA = clCreateBuffer(context,  CL_MEM_USE_HOST_PTR , bytes, h_jxyzA, NULL);
+	cl_mem d_jxyzA = clCreateBuffer(context,  CL_MEM_USE_HOST_PTR , bytes*4, h_jxyzA, NULL);
 	cl_mem d_juvwA = clCreateBuffer(context,  CL_MEM_USE_HOST_PTR , bytes, h_juvwA, NULL);
 
 	cl_mem d_jxyzB = clCreateBuffer(context,  CL_MEM_USE_HOST_PTR , bytes, h_jxyzB, NULL);
@@ -224,7 +213,7 @@ int main(int argc, char *argv[]) {
 	cl_mem d_oB = clCreateBuffer(context,  CL_MEM_USE_HOST_PTR , bytes, h_oB, NULL);
 
 	// Write our data set into the input array in device memory
-	err = clEnqueueWriteBuffer(queue, d_jxyzA, CL_TRUE, 0, bytes, h_jxyzA, 0, NULL, NULL);
+	err = clEnqueueWriteBuffer(queue, d_jxyzA, CL_TRUE, 0, bytes*4, h_jxyzA, 0, NULL, NULL);
 	err = clEnqueueWriteBuffer(queue, d_juvwA, CL_TRUE, 0, bytes, h_juvwA, 0, NULL, NULL);
 	err = clEnqueueWriteBuffer(queue, d_jxyzB, CL_TRUE, 0, bytes, h_jxyzB, 0, NULL, NULL);
 	err = clEnqueueWriteBuffer(queue, d_juvwB, CL_TRUE, 0, bytes, h_juvwB, 0, NULL, NULL);

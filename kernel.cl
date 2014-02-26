@@ -15,12 +15,16 @@ __kernel void ShurA(
     if (id < n_contact){
     	float3 gam = gamma[id];
     	unsigned int c2 = n_contact*2;
-    	out_velocityA[id]= JxyzA[id]*gam.x+JxyzA[id+n_contact]*gam.y+JxyzA[id+c2]*gam.z;
-    	out_omegaA[id]= JuvwA[id]*gam.x+JuvwA[id+n_contact]*gam.y+JuvwA[id+c2]*gam.z;
+    	out_velocityA[id]= JxyzA[id]*gam.x+JxyzA[id+n_contact*1]*gam.y+JxyzA[id+n_contact*2]*gam.z;
+    	out_omegaA[id]= JxyzA[id+n_contact*3]*gam.x+JxyzA[id+n_contact*4]*gam.y+JxyzA[id+n_contact*5]*gam.z;
 
-    	out_velocityB[id]= JxyzB[id]*gam.x+JxyzB[id+n_contact]*gam.y+JxyzB[id+c2]*gam.z;
-    	out_omegaB[id]= JuvwB[id]*gam.x+JuvwB[id+n_contact]*gam.y+JuvwB[id+c2]*gam.z;
+    	out_velocityB[id]= JxyzA[id+n_contact*6]*gam.x+JxyzA[id+n_contact*7]*gam.y+JxyzA[id+n_contact*8]*gam.z;
+    	out_omegaB[id]= JxyzA[id+n_contact*9]*gam.x+JxyzA[id+n_contact*10]*gam.y+JxyzA[id+n_contact*11]*gam.z;
     }
 }
+
+
+3+9*4
+
 
 
