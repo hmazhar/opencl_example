@@ -176,7 +176,7 @@ int main(int argc, char *argv[]) {
 	program = CreateProgram(LoadKernel("kernel.cl"), context);
 
 	// Build the program executable
-	clBuildProgram(program, 0, NULL, NULL, NULL, NULL);
+	clBuildProgram(program, 1, &deviceIds[device_num], "-cl-mad-enable", NULL, NULL);
 	size_t len = 0;
 	clGetProgramBuildInfo(program, deviceIds[device_num], CL_PROGRAM_BUILD_LOG, NULL, NULL, &len);
 	char *log = new char[len]; //or whatever you use
