@@ -123,34 +123,38 @@ int main(int argc, char *argv[]) {
 	
 
 	// Size, in bytes, of each vector
-	size_t bytes = contacts * sizeof(cl_float3);
-	size_t bytesJ = constraints * sizeof(cl_float16);
-	size_t bytesO = contacts * sizeof(cl_float16);
+	size_t bytes = constraints * sizeof(cl_float3);
+
 	// Allocate memory for each vector on host
-	cl_float16 * h_jxyzA = (cl_float16*) malloc(bytesJ);
+	cl_float3 * h_jxyzA = (cl_float3*) malloc(bytes);
+	cl_float3 * h_juvwA = (cl_float3*) malloc(bytes);
+	cl_float3 * h_jxyzB = (cl_float3*) malloc(bytes);
+	cl_float3 * h_juvwB = (cl_float3*) malloc(bytes);
 	cl_float3 * h_g = (cl_float3*) malloc(bytes);
-	cl_float16 * h_vA = (cl_float16*) malloc(bytesO);
+	cl_float3 * h_vA = (cl_float3*) malloc(bytes);
+	cl_float3 * h_oA = (cl_float3*) malloc(bytes);
+	cl_float3 * h_vB = (cl_float3*) malloc(bytes);
+	cl_float3 * h_oB = (cl_float3*) malloc(bytes);
 
 	// Initialize vectors on host
 	int i;
 	for (i = 0; i < constraints; i++) {
-
 		h_jxyzA[i].s[0] = sinf(i) * sinf(i);
 		h_jxyzA[i].s[1] = sinf(i) * sinf(i);
 		h_jxyzA[i].s[2] = sinf(i) * sinf(i);
-		h_jxyzA[i].s[3] = 0;
 
-		h_jxyzA[i].s[4] = sinf(i) * sinf(i);
-		h_jxyzA[i].s[5] = sinf(i) * sinf(i);
-		h_jxyzA[i].s[6] = sinf(i) * sinf(i);
-		h_jxyzA[i].s[7] = 0;
+		h_juvwA[i].s[0] = sinf(i) * sinf(i);
+		h_juvwA[i].s[1] = sinf(i) * sinf(i);
+		h_juvwA[i].s[2] = sinf(i) * sinf(i);
 
-		h_jxyzA[i].s[8] = sinf(i) * sinf(i);
-		h_jxyzA[i].s[9] = sinf(i) * sinf(i);
-		h_jxyzA[i].s[10] = sinf(i) * sinf(i);
-		h_jxyzA[i].s[11] = 0;
-}
-for (i = 0; i < contacts; i++) {
+		h_jxyzB[i].s[0] = sinf(i) * sinf(i);
+		h_jxyzB[i].s[1] = sinf(i) * sinf(i);
+		h_jxyzB[i].s[2] = sinf(i) * sinf(i);
+
+		h_juvwB[i].s[0] = sinf(i) * sinf(i);
+		h_juvwB[i].s[1] = sinf(i) * sinf(i);
+		h_juvwB[i].s[2] = sinf(i) * sinf(i);
+
 		h_g[i].s[0] = sinf(i) * sinf(i);
 		h_g[i].s[1] = sinf(i) * sinf(i);
 		h_g[i].s[2] = sinf(i) * sinf(i);
@@ -206,22 +210,39 @@ for (i = 0; i < contacts; i++) {
 
 
 	// Create the input and output arrays in device memory for our calculation
-	cl_mem d_jxyzA = clCreateBuffer(context,  CL_MEM_USE_HOST_PTR , bytesJ, h_jxyzA, NULL);
+	cl_mem d_jxyzA = clCreateBuffer(context,  CL_MEM_USE_HOST_PTR , bytes, h_jxyzA, NULL);
+	cl_mem d_juvwA = clCreateBuffer(context,  CL_MEM_USE_HOST_PTR , bytes, h_juvwA, NULL);
+
+	cl_mem d_jxyzB = clCreateBuffer(context,  CL_MEM_USE_HOST_PTR , bytes, h_jxyzB, NULL);
+	cl_mem d_juvwB = clCreateBuffer(context,  CL_MEM_USE_HOST_PTR , bytes, h_juvwB, NULL);
 
 	cl_mem d_g = clCreateBuffer(context,  CL_MEM_USE_HOST_PTR , bytes, h_g, NULL);
-	cl_mem d_vA = clCreateBuffer(context,  CL_MEM_USE_HOST_PTR , bytesO, h_vA, NULL);
+	cl_mem d_vA = clCreateBuffer(context,  CL_MEM_USE_HOST_PTR , bytes, h_vA, NULL);
+	cl_mem d_oA = clCreateBuffer(context,  CL_MEM_USE_HOST_PTR , bytes, h_oA, NULL);
+
+	cl_mem d_vB = clCreateBuffer(context,  CL_MEM_USE_HOST_PTR , bytes, h_vB, NULL);
+	cl_mem d_oB = clCreateBuffer(context,  CL_MEM_USE_HOST_PTR , bytes, h_oB, NULL);
 
 	// Write our data set into the input array in device memory
-	err = clEnqueueWriteBuffer(queue, d_jxyzA, CL_TRUE, 0, bytesJ, h_jxyzA, 0, NULL, NULL);
+	err = clEnqueueWriteBuffer(queue, d_jxyzA, CL_TRUE, 0, bytes, h_jxyzA, 0, NULL, NULL);
+	err = clEnqueueWriteBuffer(queue, d_juvwA, CL_TRUE, 0, bytes, h_juvwA, 0, NULL, NULL);
+	err = clEnqueueWriteBuffer(queue, d_jxyzB, CL_TRUE, 0, bytes, h_jxyzB, 0, NULL, NULL);
+	err = clEnqueueWriteBuffer(queue, d_juvwB, CL_TRUE, 0, bytes, h_juvwB, 0, NULL, NULL);
 	err = clEnqueueWriteBuffer(queue, d_g, CL_TRUE, 0, bytes, h_g, 0, NULL, NULL);
 
 
 
 	// Set the arguments to our compute kernel
 	err = clSetKernelArg(kernel, 0, sizeof(cl_mem), &d_jxyzA);
-	err = clSetKernelArg(kernel, 1, sizeof(cl_mem), &d_g);
-	err = clSetKernelArg(kernel, 2, sizeof(cl_mem), &d_vA);
-	err = clSetKernelArg(kernel, 3, sizeof(unsigned int), &contacts);
+	err = clSetKernelArg(kernel, 1, sizeof(cl_mem), &d_juvwA);
+	err = clSetKernelArg(kernel, 2, sizeof(cl_mem), &d_jxyzB);
+	err = clSetKernelArg(kernel, 3, sizeof(cl_mem), &d_juvwB);
+	err = clSetKernelArg(kernel, 4, sizeof(cl_mem), &d_g);
+	err = clSetKernelArg(kernel, 5, sizeof(cl_mem), &d_vA);
+	err = clSetKernelArg(kernel, 6, sizeof(cl_mem), &d_oA);
+	err = clSetKernelArg(kernel, 7, sizeof(cl_mem), &d_vB);
+	err = clSetKernelArg(kernel, 8, sizeof(cl_mem), &d_oB);
+	err = clSetKernelArg(kernel, 9, sizeof(unsigned int), &contacts);
 
 	// Execute the kernel over the entire range of the data set
 	err = clEnqueueNDRangeKernel(queue, kernel, 1, NULL, &globalSize, &localSize, 0, NULL, NULL);
@@ -261,16 +282,21 @@ for (i = 0; i < contacts; i++) {
 	timer_ocl +=(total_time / 1000000.0);
 	timer_omp +=(end - start)*1000;
 	flop_rate+=(60*contacts)/(total_time / 1000000.0/1000.0)/(1e9);
-	bandwidth+=(320*contacts)/(total_time / 1000000.0/1000.0)/(1e9);
+	bandwidth+=(204*contacts)/(total_time / 1000000.0/1000.0)/(1e9);
 
 	}
 	printf("\nExecution time in milliseconds = %0.3f ms |  %0.3f ms  | %0.3f Gflops| %0.3f GB/s\n", timer_ocl/10.0, timer_omp/10.0 ,flop_rate/10.0, bandwidth/10.0);
 
 	// release OpenCL resources
 	clReleaseMemObject(d_jxyzA);
+	clReleaseMemObject(d_juvwA);
+	clReleaseMemObject(d_jxyzB);
+	clReleaseMemObject(d_juvwB);
 	clReleaseMemObject(d_g);
 	clReleaseMemObject(d_vA);
-
+	clReleaseMemObject(d_oA);
+	clReleaseMemObject(d_vB);
+	clReleaseMemObject(d_oB);
 
 	clReleaseProgram(program);
 	clReleaseKernel(kernel);
@@ -279,8 +305,13 @@ for (i = 0; i < contacts; i++) {
 
 	//release host memory
 	free(h_jxyzA);
+	free(h_juvwA);
+	free(h_jxyzB);
+	free(h_juvwB);
 	free(h_g);
 	free(h_vA);
-
+	free(h_oA);
+	free(h_vB);
+	free(h_oB);
 	return 0;
 }
