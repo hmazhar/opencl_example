@@ -123,16 +123,13 @@ int main(int argc, char *argv[]) {
 	
 
 	// Size, in bytes, of each vector
-	size_t bytes = constraints * sizeof(cl_float3);
+	size_t bytes = contacts * sizeof(cl_float3);
 	size_t bytesJ = constraints * sizeof(cl_float16);
-
+	size_t bytesO = contacts * sizeof(cl_float16);
 	// Allocate memory for each vector on host
 	cl_float16 * h_jxyzA = (cl_float16*) malloc(bytesJ);
 	cl_float3 * h_g = (cl_float3*) malloc(bytes);
-	cl_float3 * h_vA = (cl_float3*) malloc(bytes);
-	cl_float3 * h_oA = (cl_float3*) malloc(bytes);
-	cl_float3 * h_vB = (cl_float3*) malloc(bytes);
-	cl_float3 * h_oB = (cl_float3*) malloc(bytes);
+	cl_float16 * h_vA = (cl_float16*) malloc(bytesO);
 
 	// Initialize vectors on host
 	int i;
@@ -152,8 +149,8 @@ int main(int argc, char *argv[]) {
 		h_jxyzA[i].s[9] = sinf(i) * sinf(i);
 		h_jxyzA[i].s[10] = sinf(i) * sinf(i);
 		h_jxyzA[i].s[11] = 0;
-
-
+}
+for (i = 0; i < contacts; i++) {
 		h_g[i].s[0] = sinf(i) * sinf(i);
 		h_g[i].s[1] = sinf(i) * sinf(i);
 		h_g[i].s[2] = sinf(i) * sinf(i);
@@ -212,11 +209,7 @@ int main(int argc, char *argv[]) {
 	cl_mem d_jxyzA = clCreateBuffer(context,  CL_MEM_USE_HOST_PTR , bytesJ, h_jxyzA, NULL);
 
 	cl_mem d_g = clCreateBuffer(context,  CL_MEM_USE_HOST_PTR , bytes, h_g, NULL);
-	cl_mem d_vA = clCreateBuffer(context,  CL_MEM_USE_HOST_PTR , bytes, h_vA, NULL);
-	cl_mem d_oA = clCreateBuffer(context,  CL_MEM_USE_HOST_PTR , bytes, h_oA, NULL);
-
-	cl_mem d_vB = clCreateBuffer(context,  CL_MEM_USE_HOST_PTR , bytes, h_vB, NULL);
-	cl_mem d_oB = clCreateBuffer(context,  CL_MEM_USE_HOST_PTR , bytes, h_oB, NULL);
+	cl_mem d_vA = clCreateBuffer(context,  CL_MEM_USE_HOST_PTR , bytesO, h_vA, NULL);
 
 	// Write our data set into the input array in device memory
 	err = clEnqueueWriteBuffer(queue, d_jxyzA, CL_TRUE, 0, bytesJ, h_jxyzA, 0, NULL, NULL);
@@ -228,10 +221,7 @@ int main(int argc, char *argv[]) {
 	err = clSetKernelArg(kernel, 0, sizeof(cl_mem), &d_jxyzA);
 	err = clSetKernelArg(kernel, 1, sizeof(cl_mem), &d_g);
 	err = clSetKernelArg(kernel, 2, sizeof(cl_mem), &d_vA);
-	err = clSetKernelArg(kernel, 3, sizeof(cl_mem), &d_oA);
-	err = clSetKernelArg(kernel, 4, sizeof(cl_mem), &d_vB);
-	err = clSetKernelArg(kernel, 5, sizeof(cl_mem), &d_oB);
-	err = clSetKernelArg(kernel, 6, sizeof(unsigned int), &contacts);
+	err = clSetKernelArg(kernel, 3, sizeof(unsigned int), &contacts);
 
 	// Execute the kernel over the entire range of the data set
 	err = clEnqueueNDRangeKernel(queue, kernel, 1, NULL, &globalSize, &localSize, 0, NULL, NULL);
@@ -280,9 +270,7 @@ int main(int argc, char *argv[]) {
 	clReleaseMemObject(d_jxyzA);
 	clReleaseMemObject(d_g);
 	clReleaseMemObject(d_vA);
-	clReleaseMemObject(d_oA);
-	clReleaseMemObject(d_vB);
-	clReleaseMemObject(d_oB);
+
 
 	clReleaseProgram(program);
 	clReleaseKernel(kernel);
@@ -293,8 +281,6 @@ int main(int argc, char *argv[]) {
 	free(h_jxyzA);
 	free(h_g);
 	free(h_vA);
-	free(h_oA);
-	free(h_vB);
-	free(h_oB);
+
 	return 0;
 }
