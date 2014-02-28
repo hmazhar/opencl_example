@@ -244,11 +244,11 @@ int main(int argc, char *argv[]) {
 	printf("Build Log:\n%s\n", log);
 
 
-
+	CheckError(err);
 
 	// Create the compute kernel in the program we wish to run
 	cl_kernel kernel = clCreateKernel(program, "KERNEL_1_0", &err);
-
+	CheckError(err);
 
 	// Create the input and output arrays in device memory for our calculation
 	cl_mem d_jxA = clCreateBuffer(context,  CL_MEM_USE_HOST_PTR , contacts * sizeof(cl_float3), h_jxA , NULL);
@@ -297,27 +297,20 @@ int main(int argc, char *argv[]) {
 
 	// Set the arguments to our compute kernel
 	err = clSetKernelArg(kernel, 0, sizeof(cl_mem), &d_jxA);
-	err = clSetKernelArg(kernel, 1, sizeof(cl_mem), &d_jyA);
-	err = clSetKernelArg(kernel, 2, sizeof(cl_mem), &d_jzA);
 
-	err = clSetKernelArg(kernel, 3, sizeof(cl_mem), &d_juA);
-	err = clSetKernelArg(kernel, 4, sizeof(cl_mem), &d_jvA);
-	err = clSetKernelArg(kernel, 5, sizeof(cl_mem), &d_jwA);
+	err = clSetKernelArg(kernel, 1, sizeof(cl_mem), &d_juA);
+	err = clSetKernelArg(kernel, 2, sizeof(cl_mem), &d_jvA);
+	err = clSetKernelArg(kernel, 3, sizeof(cl_mem), &d_jwA);
+	err = clSetKernelArg(kernel, 4,  sizeof(cl_mem), &d_juB);
+	err = clSetKernelArg(kernel, 5, sizeof(cl_mem), &d_jvB);
+	err = clSetKernelArg(kernel, 6, sizeof(cl_mem), &d_jwB);
 
-	err = clSetKernelArg(kernel, 6, sizeof(cl_mem), &d_jxB);
-	err = clSetKernelArg(kernel, 7, sizeof(cl_mem), &d_jyB);
-	err = clSetKernelArg(kernel, 8, sizeof(cl_mem), &d_jzB);
+	err = clSetKernelArg(kernel, 7, sizeof(cl_mem), &d_g);
 
-	err = clSetKernelArg(kernel, 9,  sizeof(cl_mem), &d_juB);
-	err = clSetKernelArg(kernel, 10, sizeof(cl_mem), &d_jvB);
-	err = clSetKernelArg(kernel, 11, sizeof(cl_mem), &d_jwB);
+	err = clSetKernelArg(kernel, 8, sizeof(cl_mem), &d_A);
+	err = clSetKernelArg(kernel, 9, sizeof(cl_mem), &d_B);
 
-	err = clSetKernelArg(kernel, 12, sizeof(cl_mem), &d_g);
-
-	err = clSetKernelArg(kernel, 13, sizeof(cl_mem), &d_A);
-	err = clSetKernelArg(kernel, 14, sizeof(cl_mem), &d_B);
-
-	err = clSetKernelArg(kernel, 15, sizeof(unsigned int), &contacts);
+	err = clSetKernelArg(kernel, 10, sizeof(unsigned int), &contacts);
 
 	// Execute the kernel over the entire range of the data set
 	err = clEnqueueNDRangeKernel(queue, kernel, 1, NULL, &globalSize, &localSize, 0, NULL, NULL);
