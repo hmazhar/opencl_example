@@ -130,9 +130,9 @@ int main(int argc, char *argv[]) {
 	cl_float3 * h_jyA = (cl_float3*) malloc(contacts * sizeof(cl_float3));
 	cl_float3 * h_jzA = (cl_float3*) malloc(contacts * sizeof(cl_float3));
 
-	float * h_juA = (float*) malloc(bytes);
-	float * h_jvA = (float*) malloc(bytes);
-	float * h_jwA = (float*) malloc(bytes);
+	cl_float3 * h_juA = (cl_float3*) malloc(contacts * sizeof(cl_float3));
+	cl_float3 * h_jvA = (cl_float3*) malloc(contacts * sizeof(cl_float3));
+	cl_float3 * h_jwA = (cl_float3*) malloc(contacts * sizeof(cl_float3));
 
 	float * h_jxB = (float*) malloc(bytes);
 	float * h_jyB = (float*) malloc(bytes);
@@ -182,11 +182,21 @@ int main(int argc, char *argv[]) {
 		h_g[i].s[1] = sinf(i) * sinf(i);
 		h_g[i].s[2] = sinf(i) * sinf(i);
 
+		h_juA[i].s[0] = sinf(i) * sinf(i);
+		h_juA[i].s[1] = sinf(i) * sinf(i);
+		h_juA[i].s[2] = sinf(i) * sinf(i);
+
+		h_jvA[i].s[0] = cosf(i) * cosf(i);
+		h_jvA[i].s[1] = cosf(i) * cosf(i);
+		h_jvA[i].s[2] = cosf(i) * cosf(i);
+
+		h_jwA[i].s[0] = cosf(i) * cosf(i);
+		h_jwA[i].s[1] = cosf(i) * cosf(i);
+		h_jwA[i].s[2] = cosf(i) * cosf(i);
+
 	}
 	for (i = 0; i < constraints; i++) {
-		h_juA[i] = sinf(i) * sinf(i);
-		h_jvA[i] = cosf(i) * cosf(i);
-		h_jwA[i] = cosf(i) * cosf(i);
+		
 
 	
 
@@ -243,9 +253,9 @@ int main(int argc, char *argv[]) {
 	cl_mem d_jyA = clCreateBuffer(context,  CL_MEM_READ_ONLY , contacts * sizeof(cl_float3), NULL, NULL);
 	cl_mem d_jzA = clCreateBuffer(context,  CL_MEM_READ_ONLY , contacts * sizeof(cl_float3), NULL, NULL);
 
-	cl_mem d_juA = clCreateBuffer(context,  CL_MEM_READ_ONLY , bytes, NULL, NULL);
-	cl_mem d_jvA = clCreateBuffer(context,  CL_MEM_READ_ONLY , bytes, NULL, NULL);
-	cl_mem d_jwA = clCreateBuffer(context,  CL_MEM_READ_ONLY , bytes, NULL, NULL);
+	cl_mem d_juA = clCreateBuffer(context,  CL_MEM_READ_ONLY , contacts * sizeof(cl_float3), NULL, NULL);
+	cl_mem d_jvA = clCreateBuffer(context,  CL_MEM_READ_ONLY , contacts * sizeof(cl_float3), NULL, NULL);
+	cl_mem d_jwA = clCreateBuffer(context,  CL_MEM_READ_ONLY , contacts * sizeof(cl_float3), NULL, NULL);
 
 	cl_mem d_jxB = clCreateBuffer(context,  CL_MEM_READ_ONLY , bytes, NULL, NULL);
 	cl_mem d_jyB = clCreateBuffer(context,  CL_MEM_READ_ONLY , bytes, NULL, NULL);
@@ -279,9 +289,9 @@ int main(int argc, char *argv[]) {
 	err = clEnqueueWriteBuffer(queue, d_jyA, CL_TRUE, 0, contacts * sizeof(cl_float3), h_jyA, 0, NULL, NULL);
 	err = clEnqueueWriteBuffer(queue, d_jzA, CL_TRUE, 0, contacts * sizeof(cl_float3), h_jzA, 0, NULL, NULL);
 
-	err = clEnqueueWriteBuffer(queue, d_juA, CL_TRUE, 0, bytes, h_juA, 0, NULL, NULL);
-	err = clEnqueueWriteBuffer(queue, d_jvA, CL_TRUE, 0, bytes, h_jvA, 0, NULL, NULL);
-	err = clEnqueueWriteBuffer(queue, d_jwA, CL_TRUE, 0, bytes, h_jwA, 0, NULL, NULL);
+	err = clEnqueueWriteBuffer(queue, d_juA, CL_TRUE, 0, contacts * sizeof(cl_float3), h_juA, 0, NULL, NULL);
+	err = clEnqueueWriteBuffer(queue, d_jvA, CL_TRUE, 0, contacts * sizeof(cl_float3), h_jvA, 0, NULL, NULL);
+	err = clEnqueueWriteBuffer(queue, d_jwA, CL_TRUE, 0, contacts * sizeof(cl_float3), h_jwA, 0, NULL, NULL);
 
 	err = clEnqueueWriteBuffer(queue, d_jxB, CL_TRUE, 0, bytes, h_jxB, 0, NULL, NULL);
 	err = clEnqueueWriteBuffer(queue, d_jyB, CL_TRUE, 0, bytes, h_jyB, 0, NULL, NULL);
