@@ -235,7 +235,7 @@ int main(int argc, char *argv[]) {
 	cl_program program = CreateProgram(LoadKernel("kernel.cl"), context);
 
 	// Build the program executable
-	clBuildProgram(program, 0, NULL, "-cl-mad-enable", NULL, NULL);
+	clBuildProgram(program, 0, NULL, "-cl-mad-enable -fdisable-avx", NULL, NULL);
 
 	size_t len = 0;
 	clGetProgramBuildInfo(program, deviceIds[device_num], CL_PROGRAM_BUILD_LOG, NULL, NULL, &len);
@@ -351,7 +351,7 @@ for(int i=0; i<runs; i++){
 	total_time_cl += (time_end - time_start)/ 1000000.0;
 	total_time_omp += (end - start) * 1000;
 	total_flops += 60*contacts/((time_end - time_start)/ 1000000.0/1e3)/1e9;
-	total_memory+= (17*4*4)*contacts/((time_end - time_start)/ 1000000.0/1e3)/1024.0/1024.0/1024.0;
+	total_memory+= (14*4*4)*contacts/((time_end - time_start)/ 1000000.0/1e3)/1024.0/1024.0/1024.0;
 }
 
 

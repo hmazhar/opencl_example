@@ -26,15 +26,13 @@ __kernel void KERNEL_1_0(
     result = A*gam.x+B*gam.y+C*gam.z;
     out_A[id] = result;
 
-
-
-    A.s012 = JxB[id]; //3
+    A.s012 = -JxA[id]; //3
     A.s456 = JuB[id]; //7
 
-    B.s012 = JyB[id]; //3
+    B.s012 = -JyA[id]; //3
     B.s456 = JvB[id]; //7
 
-    C.s012 = JzB[id]; //3
+    C.s012 = -JzA[id]; //3
     C.s456 = JwB[id]; //7
     result = A*gam.x+B*gam.y+C*gam.z;
     out_B[id] = result;
