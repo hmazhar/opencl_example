@@ -13,12 +13,11 @@ __kernel void KERNEL_1_0(
 
 
     float3 U = norm[id], V, W;
-    float3 T = float3(0, 1, 0);
-	W = cross(U, T);
+	W = cross(U, (float3)(0, 1, 0));
 	float mzlen = length(W);
 
 	if (mzlen < 0.0001f) { 
-		float3 mVsingular = float3(1, 0, 0);
+		float3 mVsingular = (float3)(1, 0, 0);
 		W = cross(U, mVsingular);
 		mzlen = length(W);
 	}

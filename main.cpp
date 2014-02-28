@@ -344,7 +344,7 @@ for(int i=0; i<runs; i++){
 	total_time_cl += (time_end - time_start)/ 1000000.0;
 	total_time_omp += (end - start) * 1000;
 	total_flops += 60*contacts/((time_end - time_start)/ 1000000.0/1e3)/1e9;
-	total_memory+= (14*4*4)*contacts/((time_end - time_start)/ 1000000.0/1e3)/1024.0/1024.0/1024.0;
+	total_memory+= (12*4*4)*contacts/((time_end - time_start)/ 1000000.0/1e3)/1024.0/1024.0/1024.0;
 }
 
 
