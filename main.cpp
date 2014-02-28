@@ -134,13 +134,13 @@ int main(int argc, char *argv[]) {
 	cl_float3 * h_jvA = (cl_float3*) malloc(contacts * sizeof(cl_float3));
 	cl_float3 * h_jwA = (cl_float3*) malloc(contacts * sizeof(cl_float3));
 
-	float * h_jxB = (float*) malloc(bytes);
-	float * h_jyB = (float*) malloc(bytes);
-	float * h_jzB = (float*) malloc(bytes);
+	cl_float3 * h_jxB = (cl_float3*) malloc(contacts * sizeof(cl_float3));
+	cl_float3 * h_jyB = (cl_float3*) malloc(contacts * sizeof(cl_float3));
+	cl_float3 * h_jzB = (cl_float3*) malloc(contacts * sizeof(cl_float3));
 
-	float * h_juB = (float*) malloc(bytes);
-	float * h_jvB = (float*) malloc(bytes);
-	float * h_jwB = (float*) malloc(bytes);
+	cl_float3 * h_juB = (cl_float3*) malloc(contacts * sizeof(cl_float3));
+	cl_float3 * h_jvB = (cl_float3*) malloc(contacts * sizeof(cl_float3));
+	cl_float3 * h_jwB = (cl_float3*) malloc(contacts * sizeof(cl_float3));
 
 
 
@@ -194,24 +194,39 @@ int main(int argc, char *argv[]) {
 		h_jwA[i].s[1] = cosf(i) * cosf(i);
 		h_jwA[i].s[2] = cosf(i) * cosf(i);
 
+		h_jxB[i].s[0] = sinf(i) * sinf(i);
+		h_jxB[i].s[1] = sinf(i) * sinf(i);
+		h_jxB[i].s[2] = sinf(i) * sinf(i);
+
+
+		h_jyB[i].s[0] = cosf(i) * cosf(i);
+		h_jyB[i].s[1] = cosf(i) * cosf(i);
+		h_jyB[i].s[2] = cosf(i) * cosf(i);
+
+
+		h_jzB[i].s[0] = cosf(i) * cosf(i);
+		h_jzB[i].s[1] = cosf(i) * cosf(i);
+		h_jzB[i].s[2] = cosf(i) * cosf(i);
+
+
+
+		h_juB[i].s[0] = sinf(i) * sinf(i);
+		h_juB[i].s[1] = sinf(i) * sinf(i);
+		h_juB[i].s[2] = sinf(i) * sinf(i);
+
+
+		h_jvB[i].s[0] = cosf(i) * cosf(i);
+		h_jvB[i].s[1] = cosf(i) * cosf(i);
+		h_jvB[i].s[2] = cosf(i) * cosf(i);
+
+
+		h_jwB[i].s[0] = cosf(i) * cosf(i);
+		h_jwB[i].s[1] = cosf(i) * cosf(i);
+		h_jwB[i].s[2] = cosf(i) * cosf(i);
+
+
 	}
-	for (i = 0; i < constraints; i++) {
-		
 
-	
-
-		h_jxB[i] = sinf(i) * sinf(i);
-		h_jyB[i] = cosf(i) * cosf(i);
-		h_jzB[i] = cosf(i) * cosf(i);
-
-		h_juB[i] = sinf(i) * sinf(i);
-		h_jvB[i] = cosf(i) * cosf(i);
-		h_jwB[i] = cosf(i) * cosf(i);
-
-
-	}
-
-	
 
 	// Number of work items in each local work group
 	localSize = 128;
@@ -257,13 +272,13 @@ int main(int argc, char *argv[]) {
 	cl_mem d_jvA = clCreateBuffer(context,  CL_MEM_READ_ONLY , contacts * sizeof(cl_float3), NULL, NULL);
 	cl_mem d_jwA = clCreateBuffer(context,  CL_MEM_READ_ONLY , contacts * sizeof(cl_float3), NULL, NULL);
 
-	cl_mem d_jxB = clCreateBuffer(context,  CL_MEM_READ_ONLY , bytes, NULL, NULL);
-	cl_mem d_jyB = clCreateBuffer(context,  CL_MEM_READ_ONLY , bytes, NULL, NULL);
-	cl_mem d_jzB = clCreateBuffer(context,  CL_MEM_READ_ONLY , bytes, NULL, NULL);
+	cl_mem d_jxB = clCreateBuffer(context,  CL_MEM_READ_ONLY , contacts * sizeof(cl_float3), NULL, NULL);
+	cl_mem d_jyB = clCreateBuffer(context,  CL_MEM_READ_ONLY , contacts * sizeof(cl_float3), NULL, NULL);
+	cl_mem d_jzB = clCreateBuffer(context,  CL_MEM_READ_ONLY , contacts * sizeof(cl_float3), NULL, NULL);
 
-	cl_mem d_juB = clCreateBuffer(context,  CL_MEM_READ_ONLY , bytes, NULL, NULL);
-	cl_mem d_jvB = clCreateBuffer(context,  CL_MEM_READ_ONLY , bytes, NULL, NULL);
-	cl_mem d_jwB = clCreateBuffer(context,  CL_MEM_READ_ONLY , bytes, NULL, NULL);
+	cl_mem d_juB = clCreateBuffer(context,  CL_MEM_READ_ONLY , contacts * sizeof(cl_float3), NULL, NULL);
+	cl_mem d_jvB = clCreateBuffer(context,  CL_MEM_READ_ONLY , contacts * sizeof(cl_float3), NULL, NULL);
+	cl_mem d_jwB = clCreateBuffer(context,  CL_MEM_READ_ONLY , contacts * sizeof(cl_float3), NULL, NULL);
 
 
 	cl_mem d_g = clCreateBuffer(context,  CL_MEM_READ_ONLY , contacts * sizeof(cl_float3), NULL, NULL);
@@ -293,13 +308,13 @@ int main(int argc, char *argv[]) {
 	err = clEnqueueWriteBuffer(queue, d_jvA, CL_TRUE, 0, contacts * sizeof(cl_float3), h_jvA, 0, NULL, NULL);
 	err = clEnqueueWriteBuffer(queue, d_jwA, CL_TRUE, 0, contacts * sizeof(cl_float3), h_jwA, 0, NULL, NULL);
 
-	err = clEnqueueWriteBuffer(queue, d_jxB, CL_TRUE, 0, bytes, h_jxB, 0, NULL, NULL);
-	err = clEnqueueWriteBuffer(queue, d_jyB, CL_TRUE, 0, bytes, h_jyB, 0, NULL, NULL);
-	err = clEnqueueWriteBuffer(queue, d_jzB, CL_TRUE, 0, bytes, h_jzB, 0, NULL, NULL);
+	err = clEnqueueWriteBuffer(queue, d_jxB, CL_TRUE, 0, contacts * sizeof(cl_float3), h_jxB, 0, NULL, NULL);
+	err = clEnqueueWriteBuffer(queue, d_jyB, CL_TRUE, 0, contacts * sizeof(cl_float3), h_jyB, 0, NULL, NULL);
+	err = clEnqueueWriteBuffer(queue, d_jzB, CL_TRUE, 0, contacts * sizeof(cl_float3), h_jzB, 0, NULL, NULL);
 
-	err = clEnqueueWriteBuffer(queue, d_juB, CL_TRUE, 0, bytes, h_juB, 0, NULL, NULL);
-	err = clEnqueueWriteBuffer(queue, d_jvB, CL_TRUE, 0, bytes, h_jvB, 0, NULL, NULL);
-	err = clEnqueueWriteBuffer(queue, d_jwB, CL_TRUE, 0, bytes, h_jwB, 0, NULL, NULL);
+	err = clEnqueueWriteBuffer(queue, d_juB, CL_TRUE, 0, contacts * sizeof(cl_float3), h_juB, 0, NULL, NULL);
+	err = clEnqueueWriteBuffer(queue, d_jvB, CL_TRUE, 0, contacts * sizeof(cl_float3), h_jvB, 0, NULL, NULL);
+	err = clEnqueueWriteBuffer(queue, d_jwB, CL_TRUE, 0, contacts * sizeof(cl_float3), h_jwB, 0, NULL, NULL);
 
 	err = clEnqueueWriteBuffer(queue, d_g, CL_TRUE, 0, contacts * sizeof(cl_float3), h_g, 0, NULL, NULL);
 

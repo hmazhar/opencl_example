@@ -1,8 +1,8 @@
 __kernel void KERNEL_1_0(
     __global float3 *JxA, __global float3 *JyA, __global float3 *JzA, 
 	__global float3 *JuA, __global float3 *JvA, __global float3 *JwA, 
-    __global float *JxB, __global float *JyB, __global float *JzB, 
-	__global float *JuB, __global float *JvB, __global float *JwB, 
+    __global float3 *JxB, __global float3 *JyB, __global float3 *JzB, 
+	__global float3 *JuB, __global float3 *JvB, __global float3 *JwB, 
 	__global float3 *gamma,
 	__global float *out_vel_xA, __global float *out_vel_yA, __global float *out_vel_zA,
 	__global float *out_omg_xA, __global float *out_omg_yA, __global float *out_omg_zA,
@@ -23,11 +23,11 @@ __kernel void KERNEL_1_0(
     out_omg_yA[id] = JuA[id].y*gam.x+JvA[id].y*gam.y+JwA[id].y*gam.z;
     out_omg_zA[id] = JuA[id].z*gam.x+JvA[id].z*gam.y+JwA[id].z*gam.z;
  
-    out_vel_xB[id] = JxB[id+n_contact*0]*gam.x+JyB[id+n_contact*0]*gam.y+JzB[id+n_contact*0]*gam.z;
-    out_vel_yB[id] = JxB[id+n_contact*1]*gam.x+JyB[id+n_contact*1]*gam.y+JzB[id+n_contact*1]*gam.z;
-    out_vel_zB[id] = JxB[id+n_contact*2]*gam.x+JyB[id+n_contact*2]*gam.y+JzB[id+n_contact*2]*gam.z;
+    out_vel_xB[id] = JxB[id].x*gam.x+JyB[id].x*gam.y+JzB[id].x*gam.z;
+    out_vel_yB[id] = JxB[id].y*gam.x+JyB[id].y*gam.y+JzB[id].y*gam.z;
+    out_vel_zB[id] = JxB[id].z*gam.x+JyB[id].z*gam.y+JzB[id].z*gam.z;
  
-    out_omg_xB[id] = JuB[id+n_contact*0]*gam.x+JvB[id+n_contact*0]*gam.y+JwB[id+n_contact*0]*gam.z;
-    out_omg_yB[id] = JuB[id+n_contact*1]*gam.x+JvB[id+n_contact*1]*gam.y+JwB[id+n_contact*1]*gam.z;
-    out_omg_zB[id] = JuB[id+n_contact*2]*gam.x+JvB[id+n_contact*2]*gam.y+JwB[id+n_contact*2]*gam.z;
+    out_omg_xB[id] = JuB[id].x*gam.x+JvB[id].x*gam.y+JwB[id].x*gam.z;
+    out_omg_yB[id] = JuB[id].y*gam.x+JvB[id].y*gam.y+JwB[id].y*gam.z;
+    out_omg_zB[id] = JuB[id].z*gam.x+JvB[id].z*gam.y+JwB[id].z*gam.z;
 }
