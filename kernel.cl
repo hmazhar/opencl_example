@@ -1,6 +1,6 @@
 __kernel void KERNEL_1_0(
     __global float3 *JxA, __global float3 *JyA, __global float3 *JzA, 
-	__global float3 *JuA, __global float3 *JvA, float3 float *JwA, 
+	__global float3 *JuA, __global float3 *JvA, __global float3 *JwA, 
     __global float *JxB, __global float *JyB, __global float *JzB, 
 	__global float *JuB, __global float *JvB, __global float *JwB, 
 	__global float3 *gamma,
