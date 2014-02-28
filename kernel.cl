@@ -17,19 +17,24 @@ __kernel void KERNEL_1_0(
     float gam_y = gamma_y[id];
     float gam_z = gamma_z[id];
 
-    out_vel_xA[id] = JxA[id+n_contact*0]*gam_x+JxA[id+n_contact*1]*gam_y+JxA[id+n_contact*2]*gam_z;
-    out_vel_yA[id] = JyA[id+n_contact*0]*gam_x+JyA[id+n_contact*1]*gam_y+JyA[id+n_contact*2]*gam_z;
-    out_vel_zA[id] = JzA[id+n_contact*0]*gam_x+JzA[id+n_contact*1]*gam_y+JzA[id+n_contact*2]*gam_z;
+
+
+
+
+
+    out_vel_xA[id] = JxA[id+n_contact*0]*gam_x+JyA[id+n_contact*0]*gam_y+JzA[id+n_contact*0]*gam_z;
+    out_vel_yA[id] = JxA[id+n_contact*1]*gam_x+JyA[id+n_contact*1]*gam_y+JzA[id+n_contact*1]*gam_z;
+    out_vel_zA[id] = JxA[id+n_contact*2]*gam_x+JyA[id+n_contact*2]*gam_y+JzA[id+n_contact*2]*gam_z;
  
-    out_omg_xA[id] = JuA[id+n_contact*0]*gam_x+JuA[id+n_contact*1]*gam_y+JuA[id+n_contact*2]*gam_z;
-    out_omg_yA[id] = JvA[id+n_contact*0]*gam_x+JvA[id+n_contact*1]*gam_y+JvA[id+n_contact*2]*gam_z;
-    out_omg_zA[id] = JwA[id+n_contact*0]*gam_x+JwA[id+n_contact*1]*gam_y+JwA[id+n_contact*2]*gam_z;
+    out_omg_xA[id] = JuA[id+n_contact*0]*gam_x+JvA[id+n_contact*0]*gam_y+JwA[id+n_contact*0]*gam_z;
+    out_omg_yA[id] = JuA[id+n_contact*1]*gam_x+JvA[id+n_contact*1]*gam_y+JwA[id+n_contact*1]*gam_z;
+    out_omg_zA[id] = JuA[id+n_contact*2]*gam_x+JvA[id+n_contact*2]*gam_y+JwA[id+n_contact*2]*gam_z;
  
-    out_vel_xB[id] = JxB[id+n_contact*0]*gam_x+JxB[id+n_contact*1]*gam_y+JxB[id+n_contact*2]*gam_z;
-    out_vel_yB[id] = JyB[id+n_contact*0]*gam_x+JyB[id+n_contact*1]*gam_y+JyB[id+n_contact*2]*gam_z;
-    out_vel_zB[id] = JzB[id+n_contact*0]*gam_x+JzB[id+n_contact*1]*gam_y+JzB[id+n_contact*2]*gam_z;
+    out_vel_xB[id] = JxB[id+n_contact*0]*gam_x+JyB[id+n_contact*0]*gam_y+JzB[id+n_contact*0]*gam_z;
+    out_vel_yB[id] = JxB[id+n_contact*1]*gam_x+JyB[id+n_contact*1]*gam_y+JzB[id+n_contact*1]*gam_z;
+    out_vel_zB[id] = JxB[id+n_contact*2]*gam_x+JyB[id+n_contact*2]*gam_y+JzB[id+n_contact*2]*gam_z;
  
-    out_omg_xB[id] = JuB[id+n_contact*0]*gam_x+JuB[id+n_contact*1]*gam_y+JuB[id+n_contact*2]*gam_z;
-    out_omg_yB[id] = JvB[id+n_contact*0]*gam_x+JvB[id+n_contact*1]*gam_y+JvB[id+n_contact*2]*gam_z;
-    out_omg_zB[id] = JwB[id+n_contact*0]*gam_x+JwB[id+n_contact*1]*gam_y+JwB[id+n_contact*2]*gam_z;
+    out_omg_xB[id] = JuB[id+n_contact*0]*gam_x+JvB[id+n_contact*0]*gam_y+JwB[id+n_contact*0]*gam_z;
+    out_omg_yB[id] = JuB[id+n_contact*1]*gam_x+JvB[id+n_contact*1]*gam_y+JwB[id+n_contact*1]*gam_z;
+    out_omg_zB[id] = JuB[id+n_contact*2]*gam_x+JvB[id+n_contact*2]*gam_y+JwB[id+n_contact*2]*gam_z;
 }

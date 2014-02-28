@@ -126,9 +126,9 @@ int main(int argc, char *argv[]) {
 	size_t bytes = constraints * sizeof(float);
 
 	// Allocate memory for each vector on host
-	float * h_jxA = (float*) malloc(bytes);
-	float * h_jyA = (float*) malloc(bytes);
-	float * h_jzA = (float*) malloc(bytes);
+	cl_float3 * h_jxA = (cl_float3*) malloc(contacts * sizeof(cl_float3));
+	cl_float3 * h_jyA = (cl_float3*) malloc(contacts * sizeof(cl_float3));
+	cl_float3 * h_jzA = (cl_float3*) malloc(contacts * sizeof(cl_float3));
 
 	float * h_juA = (float*) malloc(bytes);
 	float * h_jvA = (float*) malloc(bytes);
@@ -144,9 +144,8 @@ int main(int argc, char *argv[]) {
 
 
 
-	float * h_gx = (float*) malloc(bytes);
-	float * h_gy = (float*) malloc(bytes);
-	float * h_gz = (float*) malloc(bytes);
+	cl_float3 * h_g = (cl_float3*) malloc(contacts * sizeof(cl_float3));
+
 
 	float * h_vxA = (float*) malloc(bytes);
 	float * h_vyA = (float*) malloc(bytes);
@@ -166,18 +165,30 @@ int main(int argc, char *argv[]) {
 
 	// Initialize vectors on host
 	int i;
-	for (i = 0; i < constraints; i++) {
-		h_jxA[i] = sinf(i) * sinf(i);
-		h_jyA[i] = cosf(i) * cosf(i);
-		h_jzA[i] = cosf(i) * cosf(i);
+	for (i = 0; i < contacts; i++) {
+		h_jxA[i].s[0] = sinf(i) * sinf(i);
+		h_jxA[i].s[1] = sinf(i) * sinf(i);
+		h_jxA[i].s[2] = sinf(i) * sinf(i);
 
+		h_jyA[i].s[0] = sinf(i) * sinf(i);
+		h_jyA[i].s[1] = sinf(i) * sinf(i);
+		h_jyA[i].s[2] = sinf(i) * sinf(i);
+
+		h_jzA[i].s[0] = sinf(i) * sinf(i);
+		h_jzA[i].s[1] = sinf(i) * sinf(i);
+		h_jzA[i].s[2] = sinf(i) * sinf(i);
+
+		h_g[i].s[0] = sinf(i) * sinf(i);
+		h_g[i].s[1] = sinf(i) * sinf(i);
+		h_g[i].s[2] = sinf(i) * sinf(i);
+
+	}
+	for (i = 0; i < constraints; i++) {
 		h_juA[i] = sinf(i) * sinf(i);
 		h_jvA[i] = cosf(i) * cosf(i);
 		h_jwA[i] = cosf(i) * cosf(i);
 
-		h_gx[i] = sinf(i) * sinf(i);
-		h_gy[i] = cosf(i) * cosf(i);
-		h_gz[i] = cosf(i) * cosf(i);
+	
 
 		h_jxB[i] = sinf(i) * sinf(i);
 		h_jyB[i] = cosf(i) * cosf(i);
@@ -214,14 +225,23 @@ int main(int argc, char *argv[]) {
 	// Build the program executable
 	clBuildProgram(program, 0, NULL, "-cl-mad-enable", NULL, NULL);
 
+	size_t len = 0;
+	clGetProgramBuildInfo(program, deviceIds[device_num], CL_PROGRAM_BUILD_LOG, NULL, NULL, &len);
+	char *log = new char[len]; //or whatever you use
+	clGetProgramBuildInfo(program, deviceIds[device_num], CL_PROGRAM_BUILD_LOG, len, log, NULL);
+	printf("Build Log:\n%s\n", log);
+
+
+
+
 	// Create the compute kernel in the program we wish to run
 	cl_kernel kernel = clCreateKernel(program, "KERNEL_1_0", &err);
 
 
 	// Create the input and output arrays in device memory for our calculation
-	cl_mem d_jxA = clCreateBuffer(context,  CL_MEM_READ_ONLY , bytes, NULL, NULL);
-	cl_mem d_jyA = clCreateBuffer(context,  CL_MEM_READ_ONLY , bytes, NULL, NULL);
-	cl_mem d_jzA = clCreateBuffer(context,  CL_MEM_READ_ONLY , bytes, NULL, NULL);
+	cl_mem d_jxA = clCreateBuffer(context,  CL_MEM_READ_ONLY , contacts * sizeof(cl_float3), NULL, NULL);
+	cl_mem d_jyA = clCreateBuffer(context,  CL_MEM_READ_ONLY , contacts * sizeof(cl_float3), NULL, NULL);
+	cl_mem d_jzA = clCreateBuffer(context,  CL_MEM_READ_ONLY , contacts * sizeof(cl_float3), NULL, NULL);
 
 	cl_mem d_juA = clCreateBuffer(context,  CL_MEM_READ_ONLY , bytes, NULL, NULL);
 	cl_mem d_jvA = clCreateBuffer(context,  CL_MEM_READ_ONLY , bytes, NULL, NULL);
@@ -236,9 +256,7 @@ int main(int argc, char *argv[]) {
 	cl_mem d_jwB = clCreateBuffer(context,  CL_MEM_READ_ONLY , bytes, NULL, NULL);
 
 
-	cl_mem d_gx = clCreateBuffer(context,  CL_MEM_READ_ONLY , bytes, NULL, NULL);
-	cl_mem d_gy = clCreateBuffer(context,  CL_MEM_READ_ONLY , bytes, NULL, NULL);
-	cl_mem d_gz = clCreateBuffer(context,  CL_MEM_READ_ONLY , bytes, NULL, NULL);
+	cl_mem d_g = clCreateBuffer(context,  CL_MEM_READ_ONLY , contacts * sizeof(cl_float3), NULL, NULL);
 
 	cl_mem d_vxA = clCreateBuffer(context,  CL_MEM_WRITE_ONLY , bytes,NULL, NULL);
 	cl_mem d_vyA = clCreateBuffer(context,  CL_MEM_WRITE_ONLY , bytes,NULL, NULL);
@@ -257,9 +275,9 @@ int main(int argc, char *argv[]) {
 	cl_mem d_ozB = clCreateBuffer(context,  CL_MEM_WRITE_ONLY , bytes,NULL, NULL);
 
 	// Write our data set into the input array in device memory
-	err = clEnqueueWriteBuffer(queue, d_jxA, CL_TRUE, 0, bytes, h_jxA, 0, NULL, NULL);
-	err = clEnqueueWriteBuffer(queue, d_jyA, CL_TRUE, 0, bytes, h_jyA, 0, NULL, NULL);
-	err = clEnqueueWriteBuffer(queue, d_jzA, CL_TRUE, 0, bytes, h_jzA, 0, NULL, NULL);
+	err = clEnqueueWriteBuffer(queue, d_jxA, CL_TRUE, 0, contacts * sizeof(cl_float3), h_jxA, 0, NULL, NULL);
+	err = clEnqueueWriteBuffer(queue, d_jyA, CL_TRUE, 0, contacts * sizeof(cl_float3), h_jyA, 0, NULL, NULL);
+	err = clEnqueueWriteBuffer(queue, d_jzA, CL_TRUE, 0, contacts * sizeof(cl_float3), h_jzA, 0, NULL, NULL);
 
 	err = clEnqueueWriteBuffer(queue, d_juA, CL_TRUE, 0, bytes, h_juA, 0, NULL, NULL);
 	err = clEnqueueWriteBuffer(queue, d_jvA, CL_TRUE, 0, bytes, h_jvA, 0, NULL, NULL);
@@ -273,9 +291,8 @@ int main(int argc, char *argv[]) {
 	err = clEnqueueWriteBuffer(queue, d_jvB, CL_TRUE, 0, bytes, h_jvB, 0, NULL, NULL);
 	err = clEnqueueWriteBuffer(queue, d_jwB, CL_TRUE, 0, bytes, h_jwB, 0, NULL, NULL);
 
-	err = clEnqueueWriteBuffer(queue, d_gx, CL_TRUE, 0, bytes, h_gx, 0, NULL, NULL);
-	err = clEnqueueWriteBuffer(queue, d_gy, CL_TRUE, 0, bytes, h_gy, 0, NULL, NULL);
-	err = clEnqueueWriteBuffer(queue, d_gz, CL_TRUE, 0, bytes, h_gz, 0, NULL, NULL);
+	err = clEnqueueWriteBuffer(queue, d_g, CL_TRUE, 0, contacts * sizeof(cl_float3), h_g, 0, NULL, NULL);
+
 
 	// Set the arguments to our compute kernel
 	err = clSetKernelArg(kernel, 0, sizeof(cl_mem), &d_jxA);
@@ -294,26 +311,24 @@ int main(int argc, char *argv[]) {
 	err = clSetKernelArg(kernel, 10, sizeof(cl_mem), &d_jvB);
 	err = clSetKernelArg(kernel, 11, sizeof(cl_mem), &d_jwB);
 
-	err = clSetKernelArg(kernel, 12, sizeof(cl_mem), &d_gx);
-	err = clSetKernelArg(kernel, 13, sizeof(cl_mem), &d_gy);
-	err = clSetKernelArg(kernel, 14, sizeof(cl_mem), &d_gz);
+	err = clSetKernelArg(kernel, 12, sizeof(cl_mem), &d_g);
 
-	err = clSetKernelArg(kernel, 15, sizeof(cl_mem), &d_vxA);
-	err = clSetKernelArg(kernel, 16, sizeof(cl_mem), &d_vyA);
-	err = clSetKernelArg(kernel, 17, sizeof(cl_mem), &d_vzA);
+	err = clSetKernelArg(kernel, 13, sizeof(cl_mem), &d_vxA);
+	err = clSetKernelArg(kernel, 14, sizeof(cl_mem), &d_vyA);
+	err = clSetKernelArg(kernel, 15, sizeof(cl_mem), &d_vzA);
 
-	err = clSetKernelArg(kernel, 18, sizeof(cl_mem), &d_oxA);
-	err = clSetKernelArg(kernel, 19, sizeof(cl_mem), &d_oyA);
-	err = clSetKernelArg(kernel, 20, sizeof(cl_mem), &d_ozA);
+	err = clSetKernelArg(kernel, 16, sizeof(cl_mem), &d_oxA);
+	err = clSetKernelArg(kernel, 17, sizeof(cl_mem), &d_oyA);
+	err = clSetKernelArg(kernel, 18, sizeof(cl_mem), &d_ozA);
 
-	err = clSetKernelArg(kernel, 21, sizeof(cl_mem), &d_vxB);
-	err = clSetKernelArg(kernel, 22, sizeof(cl_mem), &d_vyB);
-	err = clSetKernelArg(kernel, 23, sizeof(cl_mem), &d_vzB);
+	err = clSetKernelArg(kernel, 19, sizeof(cl_mem), &d_vxB);
+	err = clSetKernelArg(kernel, 20, sizeof(cl_mem), &d_vyB);
+	err = clSetKernelArg(kernel, 21, sizeof(cl_mem), &d_vzB);
 
-	err = clSetKernelArg(kernel, 24, sizeof(cl_mem), &d_oxB);
-	err = clSetKernelArg(kernel, 25, sizeof(cl_mem), &d_oyB);
-	err = clSetKernelArg(kernel, 26, sizeof(cl_mem), &d_ozB);
-	err = clSetKernelArg(kernel, 27, sizeof(unsigned int), &contacts);
+	err = clSetKernelArg(kernel, 22, sizeof(cl_mem), &d_oxB);
+	err = clSetKernelArg(kernel, 23, sizeof(cl_mem), &d_oyB);
+	err = clSetKernelArg(kernel, 24, sizeof(cl_mem), &d_ozB);
+	err = clSetKernelArg(kernel, 25, sizeof(unsigned int), &contacts);
 
 	// Execute the kernel over the entire range of the data set
 	err = clEnqueueNDRangeKernel(queue, kernel, 1, NULL, &globalSize, &localSize, 0, NULL, NULL);
@@ -370,9 +385,7 @@ for(int i=0; i<runs; i++){
 	clReleaseMemObject(d_jvB);
 	clReleaseMemObject(d_jwB);
 
-	clReleaseMemObject(d_gx);
-	clReleaseMemObject(d_gy);
-	clReleaseMemObject(d_gz);
+	clReleaseMemObject(d_g);
 
 
 	clReleaseMemObject(d_vxA);
@@ -413,9 +426,7 @@ for(int i=0; i<runs; i++){
 	free(h_jvB);
 	free(h_jwB);
 
-	free(h_gx);
-	free(h_gy);
-	free(h_gz);
+	free(h_g);
 
 	free(h_vxA);
 	free(h_vyA);
