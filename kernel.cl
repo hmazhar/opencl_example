@@ -19,9 +19,30 @@ __kernel void KERNEL_1_0(
     float3 _JxB = JxB[id], _JyB = JyB[id], _JzB = JzB[id];
     float3 _JuB = JuB[id], _JvB = JvB[id], _JwB = JwB[id];
 
-    out_vel_A[id] = _JxA*gam.x+_JyA*gam.y+_JzA*gam.z;
-    out_omg_A[id] = _JuA*gam.x+_JvA*gam.y+_JwA*gam.z;
-    out_vel_B[id] = _JxB*gam.x+_JyB*gam.y+_JzB*gam.z;
-    out_omg_B[id] = _JuB*gam.x+_JvB*gam.y+_JwB*gam.z;
+    float16 A;
+    A.s012 = _JxA; //3
+    A.s456 = _JuA; //7
+    A.s89a = _JxB; //b
+    A.scde = _JuB; //f
+
+    float16 B;
+    B.s012 = _JyA; //3
+    B.s456 = _JvA; //7
+    B.s89a = _JyB; //b
+    B.scde = _JvB; //f
+
+
+    float16 C;
+    C.s012 = _JzA; //3
+    C.s456 = _JwA; //7
+    C.s89a = _JzB; //b
+    C.scde = _JwB; //f
+
+    float16 result = A*gam.x+B*gam.y+C*gam.z;
+
+    out_vel_A[id] = result.s012;
+    out_omg_A[id] = result.s456;
+    out_vel_B[id] = result.s89a;
+    out_omg_B[id] = result.scde;
 
 }
