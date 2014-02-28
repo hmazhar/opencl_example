@@ -14,20 +14,24 @@ __kernel void KERNEL_1_0(
     if (id >= n_contact){return;}
 
     float3 gam = gamma[id];
+    float3 _JxA = JxA[id], _JyA = JyA[id], _JzA = JzA[id];
+    float3 _JuA = JuA[id], _JvA = JvA[id], _JwA = JwA[id];
+    float3 _JxB = JxB[id], _JyB = JyB[id], _JzB = JzB[id];
+    float3 _JuB = JuB[id], _JvB = JvB[id], _JwB = JwB[id];
 
-    out_vel_xA[id] = JxA[id].x*gam.x+JyA[id].x*gam.y+JzA[id].x*gam.z;
-    out_vel_yA[id] = JxA[id].y*gam.x+JyA[id].y*gam.y+JzA[id].y*gam.z;
-    out_vel_zA[id] = JxA[id].z*gam.x+JyA[id].z*gam.y+JzA[id].z*gam.z;
+    out_vel_xA[id] = _JxA.x*gam.x+_JyA.x*gam.y+_JzA.x*gam.z;
+    out_vel_yA[id] = _JxA.y*gam.x+_JyA.y*gam.y+_JzA.y*gam.z;
+    out_vel_zA[id] = _JxA.z*gam.x+_JyA.z*gam.y+_JzA.z*gam.z;
  
-    out_omg_xA[id] = JuA[id].x*gam.x+JvA[id].x*gam.y+JwA[id].x*gam.z;
-    out_omg_yA[id] = JuA[id].y*gam.x+JvA[id].y*gam.y+JwA[id].y*gam.z;
-    out_omg_zA[id] = JuA[id].z*gam.x+JvA[id].z*gam.y+JwA[id].z*gam.z;
+    out_omg_xA[id] = _JuA.x*gam.x+_JvA.x*gam.y+_JwA.x*gam.z;
+    out_omg_yA[id] = _JuA.y*gam.x+_JvA.y*gam.y+_JwA.y*gam.z;
+    out_omg_zA[id] = _JuA.z*gam.x+_JvA.z*gam.y+_JwA.z*gam.z;
  
-    out_vel_xB[id] = JxB[id].x*gam.x+JyB[id].x*gam.y+JzB[id].x*gam.z;
-    out_vel_yB[id] = JxB[id].y*gam.x+JyB[id].y*gam.y+JzB[id].y*gam.z;
-    out_vel_zB[id] = JxB[id].z*gam.x+JyB[id].z*gam.y+JzB[id].z*gam.z;
+    out_vel_xB[id] = _JxB.x*gam.x+_JyB.x*gam.y+_JzB.x*gam.z;
+    out_vel_yB[id] = _JxB.y*gam.x+_JyB.y*gam.y+_JzB.y*gam.z;
+    out_vel_zB[id] = _JxB.z*gam.x+_JyB.z*gam.y+_JzB.z*gam.z;
  
-    out_omg_xB[id] = JuB[id].x*gam.x+JvB[id].x*gam.y+JwB[id].x*gam.z;
-    out_omg_yB[id] = JuB[id].y*gam.x+JvB[id].y*gam.y+JwB[id].y*gam.z;
-    out_omg_zB[id] = JuB[id].z*gam.x+JvB[id].z*gam.y+JwB[id].z*gam.z;
+    out_omg_xB[id] = _JuB.x*gam.x+_JvB.x*gam.y+_JwB.x*gam.z;
+    out_omg_yB[id] = _JuB.y*gam.x+_JvB.y*gam.y+_JwB.y*gam.z;
+    out_omg_zB[id] = _JuB.z*gam.x+_JvB.z*gam.y+_JwB.z*gam.z;
 }
