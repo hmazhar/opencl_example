@@ -103,7 +103,6 @@ for (i = 0; i < constraints; i++) {
 int n_contact = contacts;
 
 
-double total_time_cl;
 double total_time_omp;
 double total_flops;
 double total_memory;

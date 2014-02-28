@@ -253,29 +253,29 @@ int main(int argc, char *argv[]) {
 
 
 	// Create the input and output arrays in device memory for our calculation
-	cl_mem d_jxA = clCreateBuffer(context,  CL_MEM_READ_ONLY , contacts * sizeof(cl_float3), NULL, NULL);
-	cl_mem d_jyA = clCreateBuffer(context,  CL_MEM_READ_ONLY , contacts * sizeof(cl_float3), NULL, NULL);
-	cl_mem d_jzA = clCreateBuffer(context,  CL_MEM_READ_ONLY , contacts * sizeof(cl_float3), NULL, NULL);
+	cl_mem d_jxA = clCreateBuffer(context,  CL_MEM_USE_HOST_PTR , contacts * sizeof(cl_float3), h_jxA , NULL);
+	cl_mem d_jyA = clCreateBuffer(context,  CL_MEM_USE_HOST_PTR , contacts * sizeof(cl_float3), h_jyA , NULL);
+	cl_mem d_jzA = clCreateBuffer(context,  CL_MEM_USE_HOST_PTR , contacts * sizeof(cl_float3), h_jzA , NULL);
 
-	cl_mem d_juA = clCreateBuffer(context,  CL_MEM_READ_ONLY , contacts * sizeof(cl_float3), NULL, NULL);
-	cl_mem d_jvA = clCreateBuffer(context,  CL_MEM_READ_ONLY , contacts * sizeof(cl_float3), NULL, NULL);
-	cl_mem d_jwA = clCreateBuffer(context,  CL_MEM_READ_ONLY , contacts * sizeof(cl_float3), NULL, NULL);
+	cl_mem d_juA = clCreateBuffer(context,  CL_MEM_USE_HOST_PTR , contacts * sizeof(cl_float3), h_juA , NULL);
+	cl_mem d_jvA = clCreateBuffer(context,  CL_MEM_USE_HOST_PTR , contacts * sizeof(cl_float3), h_jvA , NULL);
+	cl_mem d_jwA = clCreateBuffer(context,  CL_MEM_USE_HOST_PTR , contacts * sizeof(cl_float3), h_jwA , NULL);
 
-	cl_mem d_jxB = clCreateBuffer(context,  CL_MEM_READ_ONLY , contacts * sizeof(cl_float3), NULL, NULL);
-	cl_mem d_jyB = clCreateBuffer(context,  CL_MEM_READ_ONLY , contacts * sizeof(cl_float3), NULL, NULL);
-	cl_mem d_jzB = clCreateBuffer(context,  CL_MEM_READ_ONLY , contacts * sizeof(cl_float3), NULL, NULL);
+	cl_mem d_jxB = clCreateBuffer(context,  CL_MEM_USE_HOST_PTR , contacts * sizeof(cl_float3), h_jxB , NULL);
+	cl_mem d_jyB = clCreateBuffer(context,  CL_MEM_USE_HOST_PTR , contacts * sizeof(cl_float3), h_jyB , NULL);
+	cl_mem d_jzB = clCreateBuffer(context,  CL_MEM_USE_HOST_PTR , contacts * sizeof(cl_float3), h_jzB , NULL);
 
-	cl_mem d_juB = clCreateBuffer(context,  CL_MEM_READ_ONLY , contacts * sizeof(cl_float3), NULL, NULL);
-	cl_mem d_jvB = clCreateBuffer(context,  CL_MEM_READ_ONLY , contacts * sizeof(cl_float3), NULL, NULL);
-	cl_mem d_jwB = clCreateBuffer(context,  CL_MEM_READ_ONLY , contacts * sizeof(cl_float3), NULL, NULL);
+	cl_mem d_juB = clCreateBuffer(context,  CL_MEM_USE_HOST_PTR , contacts * sizeof(cl_float3), h_juB , NULL);
+	cl_mem d_jvB = clCreateBuffer(context,  CL_MEM_USE_HOST_PTR , contacts * sizeof(cl_float3), h_jvB , NULL);
+	cl_mem d_jwB = clCreateBuffer(context,  CL_MEM_USE_HOST_PTR , contacts * sizeof(cl_float3), h_jwB , NULL);
 
 
-	cl_mem d_g = clCreateBuffer(context,  CL_MEM_READ_ONLY , contacts * sizeof(cl_float3), NULL, NULL);
+	cl_mem d_g   = clCreateBuffer(context,  CL_MEM_USE_HOST_PTR , contacts * sizeof(cl_float3), h_g   , NULL);
 
-	cl_mem d_vA = clCreateBuffer(context,  CL_MEM_WRITE_ONLY , contacts * sizeof(cl_float3),NULL, NULL);
-	cl_mem d_oA = clCreateBuffer(context,  CL_MEM_WRITE_ONLY , contacts * sizeof(cl_float3),NULL, NULL);
-	cl_mem d_vB = clCreateBuffer(context,  CL_MEM_WRITE_ONLY , contacts * sizeof(cl_float3),NULL, NULL);
-	cl_mem d_oB = clCreateBuffer(context,  CL_MEM_WRITE_ONLY , contacts * sizeof(cl_float3),NULL, NULL);
+	cl_mem d_vA  = clCreateBuffer(context,   CL_MEM_USE_HOST_PTR , contacts * sizeof(cl_float3),h_vA  , NULL);
+	cl_mem d_oA  = clCreateBuffer(context,   CL_MEM_USE_HOST_PTR , contacts * sizeof(cl_float3),h_oA  , NULL);
+	cl_mem d_vB  = clCreateBuffer(context,   CL_MEM_USE_HOST_PTR , contacts * sizeof(cl_float3),h_vB  , NULL);
+	cl_mem d_oB  = clCreateBuffer(context,   CL_MEM_USE_HOST_PTR , contacts * sizeof(cl_float3),h_oB  , NULL);
 
 
 	// Write our data set into the input array in device memory
