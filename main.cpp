@@ -146,8 +146,8 @@ int main(int argc, char *argv[]) {
 
 	cl_float3 * h_g = (cl_float3*) malloc(contacts * sizeof(cl_float3));
 
-	cl_float8 * h_vA = (cl_float8*) malloc(contacts * sizeof(cl_float8));
-	cl_float8 * h_vB = (cl_float8*) malloc(contacts * sizeof(cl_float8));
+	cl_float8 * h_A = (cl_float8*) malloc(contacts * sizeof(cl_float8));
+	cl_float8 * h_B = (cl_float8*) malloc(contacts * sizeof(cl_float8));
 
 
 	// Initialize vectors on host
@@ -270,8 +270,8 @@ int main(int argc, char *argv[]) {
 
 	cl_mem d_g   = clCreateBuffer(context,  CL_MEM_USE_HOST_PTR , contacts * sizeof(cl_float3), h_g   , NULL);
 
-	cl_mem d_vA  = clCreateBuffer(context,   CL_MEM_USE_HOST_PTR , contacts * sizeof(cl_float8),h_vA  , NULL);
-	cl_mem d_vB  = clCreateBuffer(context,   CL_MEM_USE_HOST_PTR , contacts * sizeof(cl_float8),h_vB  , NULL);
+	cl_mem d_A  = clCreateBuffer(context,   CL_MEM_USE_HOST_PTR , contacts * sizeof(cl_float8),h_A  , NULL);
+	cl_mem d_B  = clCreateBuffer(context,   CL_MEM_USE_HOST_PTR , contacts * sizeof(cl_float8),h_B  , NULL);
 
 
 
@@ -314,8 +314,8 @@ int main(int argc, char *argv[]) {
 
 	err = clSetKernelArg(kernel, 12, sizeof(cl_mem), &d_g);
 
-	err = clSetKernelArg(kernel, 13, sizeof(cl_mem), &d_vA);
-	err = clSetKernelArg(kernel, 14, sizeof(cl_mem), &d_vB);
+	err = clSetKernelArg(kernel, 13, sizeof(cl_mem), &d_A);
+	err = clSetKernelArg(kernel, 14, sizeof(cl_mem), &d_B);
 
 	err = clSetKernelArg(kernel, 15, sizeof(unsigned int), &contacts);
 
@@ -376,12 +376,8 @@ for(int i=0; i<runs; i++){
 
 	clReleaseMemObject(d_g);
 
-
-	clReleaseMemObject(d_vA);
-
-	clReleaseMemObject(d_vB);
-
-
+	clReleaseMemObject(d_A);
+	clReleaseMemObject(d_B);
 
 	clReleaseProgram(program);
 	clReleaseKernel(kernel);
@@ -407,9 +403,8 @@ for(int i=0; i<runs; i++){
 
 	free(h_g);
 
-	free(h_vA);
-
-	free(h_vB);
+	free(h_A);
+	free(h_B);
 
 
 	return 0;
