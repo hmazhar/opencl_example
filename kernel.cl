@@ -14,34 +14,30 @@ __kernel void KERNEL_1_0(
     if (id >= n_contact){return;}
 
     float3 gam = gamma[id];
-    float3 _JxA = JxA[id], _JyA = JyA[id], _JzA = JzA[id];
-    float3 _JuA = JuA[id], _JvA = JvA[id], _JwA = JwA[id];
-    float3 _JxB = JxB[id], _JyB = JyB[id], _JzB = JzB[id];
-    float3 _JuB = JuB[id], _JvB = JvB[id], _JwB = JwB[id];
-
+    
     float8 A,B,C, result;
-    A.s012 = _JxA; //3
-    A.s456 = _JuA; //7
+    A.s012 = JxA[id]; //3
+    A.s456 = JuA[id]; //7
 
-    B.s012 = _JyA; //3
-    B.s456 = _JvA; //7
+    B.s012 = JyA[id]; //3
+    B.s456 = JvA[id]; //7
 
-    C.s012 = _JzA; //3
-    C.s456 = _JwA; //7
+    C.s012 = JzA[id]; //3
+    C.s456 = JwA[id]; //7
 
     result = A*gam.x+B*gam.y+C*gam.z;
     out_vel_A[id] = result.s012;
     out_omg_A[id] = result.s456;
 
 
-    A.s012 = _JxB; //3
-    A.s456 = _JuB; //7
+    A.s012 = JxB[id]; //3
+    A.s456 = JuB[id]; //7
 
-    B.s012 = _JyB; //3
-    B.s456 = _JvB; //7
+    B.s012 = JyB[id]; //3
+    B.s456 = JvB[id]; //7
 
-    C.s012 = _JzB; //3
-    C.s456 = _JwB; //7
+    C.s012 = JzB[id]; //3
+    C.s456 = JwB[id]; //7
     result = A*gam.x+B*gam.y+C*gam.z;
     out_vel_B[id] = result.s012;
     out_omg_B[id] = result.s456;
