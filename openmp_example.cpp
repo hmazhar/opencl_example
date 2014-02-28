@@ -30,8 +30,8 @@ omp_set_num_threads(thread_num);
     // Host input vectors
     float *gamma_x, *gamma_y, *gamma_z;
 // Host output vectors
-    float *out_velocity_x, *out_velocity_y, *out_velocity_z;
-    float *out_omega_x, *out_omega_y, *out_omega_z;
+    float *out_vel_x, *out_vel_y, *out_vel_z;
+    float *out_omg_x, *out_omg_y, *out_omg_z;
  
 
     // Size, in bytes, of each vector
@@ -58,22 +58,22 @@ omp_set_num_threads(thread_num);
     gamma_y         = (float*) malloc(bytes);
     gamma_z         = (float*) malloc(bytes);
 
-    float * out_velocity_xA  = (float*) malloc(bytes);
-    float * out_velocity_yA  = (float*) malloc(bytes);
-    float * out_velocity_zA  = (float*) malloc(bytes);
+    float * out_vel_xA  = (float*) malloc(bytes);
+    float * out_vel_yA  = (float*) malloc(bytes);
+    float * out_vel_zA  = (float*) malloc(bytes);
 
-    float * out_omega_xA     = (float*) malloc(bytes);
-    float * out_omega_yA     = (float*) malloc(bytes);
-    float * out_omega_zA     = (float*) malloc(bytes);
+    float * out_omg_xA     = (float*) malloc(bytes);
+    float * out_omg_yA     = (float*) malloc(bytes);
+    float * out_omg_zA     = (float*) malloc(bytes);
 
 
-    float * out_velocity_xB  = (float*) malloc(bytes);
-    float * out_velocity_yB  = (float*) malloc(bytes);
-    float * out_velocity_zB  = (float*) malloc(bytes);
+    float * out_vel_xB  = (float*) malloc(bytes);
+    float * out_vel_yB  = (float*) malloc(bytes);
+    float * out_vel_zB  = (float*) malloc(bytes);
 
-    float * out_omega_xB     = (float*) malloc(bytes);
-    float * out_omega_yB     = (float*) malloc(bytes);
-    float * out_omega_zB     = (float*) malloc(bytes);
+    float * out_omg_xB     = (float*) malloc(bytes);
+    float * out_omg_yB     = (float*) malloc(bytes);
+    float * out_omg_zB     = (float*) malloc(bytes);
  
     // Initialize vectors on host
     int i;
@@ -101,33 +101,49 @@ for (i = 0; i < constraints; i++) {
     }
  
 int n_contact = contacts;
+
+
+double total_time_cl;
+double total_time_omp;
+double total_flops;
+double total_memory;
+double  runs = 100;
+for(int i=0; i<runs; i++){
+
 double start = omp_get_wtime();
 #pragma omp parallel for
 for(int id=0; id<n_contact; id++){
 
-        float gam_x = gamma_x[id];
-        float gam_y = gamma_y[id];
-        float gam_z = gamma_z[id];
-        unsigned int c2 = n_contact*2;
-        out_velocity_xA[id]= JxA[id]*gam_x+JxA[id+n_contact]*gam_y+JxA[id+c2]*gam_z;
-        out_velocity_yA[id]= JyA[id]*gam_x+JyA[id+n_contact]*gam_y+JyA[id+c2]*gam_z;
-        out_velocity_zA[id]= JzA[id]*gam_x+JzA[id+n_contact]*gam_y+JzA[id+c2]*gam_z;
+    float gam_x = gamma_x[id];
+    float gam_y = gamma_y[id];
+    float gam_z = gamma_z[id];
 
-        out_omega_xA[id]= JuA[id]*gam_x+JuA[id+n_contact]*gam_y+JuA[id+c2]*gam_z;
-        out_omega_yA[id]= JvA[id]*gam_x+JvA[id+n_contact]*gam_y+JvA[id+c2]*gam_z;
-        out_omega_zA[id]= JwA[id]*gam_x+JwA[id+n_contact]*gam_y+JwA[id+c2]*gam_z;
-
-        out_velocity_xB[id]= JxB[id]*gam_x+JxB[id+n_contact]*gam_y+JxB[id+c2]*gam_z;
-        out_velocity_yB[id]= JyB[id]*gam_x+JyB[id+n_contact]*gam_y+JyB[id+c2]*gam_z;
-        out_velocity_zB[id]= JzB[id]*gam_x+JzB[id+n_contact]*gam_y+JzB[id+c2]*gam_z;
-
-        out_omega_xB[id]= JuB[id]*gam_x+JuB[id+n_contact]*gam_y+JuB[id+c2]*gam_z;
-        out_omega_yB[id]= JvB[id]*gam_x+JvB[id+n_contact]*gam_y+JvB[id+c2]*gam_z;
-        out_omega_zB[id]= JwB[id]*gam_x+JwB[id+n_contact]*gam_y+JwB[id+c2]*gam_z;
+    out_vel_xA[id] = JxA[id+n_contact*0]*gam_x+JxA[id+n_contact*1]*gam_y+JxA[id+n_contact*2]*gam_z;
+    out_vel_yA[id] = JyA[id+n_contact*0]*gam_x+JyA[id+n_contact*1]*gam_y+JyA[id+n_contact*2]*gam_z;
+    out_vel_zA[id] = JzA[id+n_contact*0]*gam_x+JzA[id+n_contact*1]*gam_y+JzA[id+n_contact*2]*gam_z;
+ 
+    out_omg_xA[id] = JuA[id+n_contact*0]*gam_x+JuA[id+n_contact*1]*gam_y+JuA[id+n_contact*2]*gam_z;
+    out_omg_yA[id] = JvA[id+n_contact*0]*gam_x+JvA[id+n_contact*1]*gam_y+JvA[id+n_contact*2]*gam_z;
+    out_omg_zA[id] = JwA[id+n_contact*0]*gam_x+JwA[id+n_contact*1]*gam_y+JwA[id+n_contact*2]*gam_z;
+ 
+    out_vel_xB[id] = JxB[id+n_contact*0]*gam_x+JxB[id+n_contact*1]*gam_y+JxB[id+n_contact*2]*gam_z;
+    out_vel_yB[id] = JyB[id+n_contact*0]*gam_x+JyB[id+n_contact*1]*gam_y+JyB[id+n_contact*2]*gam_z;
+    out_vel_zB[id] = JzB[id+n_contact*0]*gam_x+JzB[id+n_contact*1]*gam_y+JzB[id+n_contact*2]*gam_z;
+ 
+    out_omg_xB[id] = JuB[id+n_contact*0]*gam_x+JuB[id+n_contact*1]*gam_y+JuB[id+n_contact*2]*gam_z;
+    out_omg_yB[id] = JvB[id+n_contact*0]*gam_x+JvB[id+n_contact*1]*gam_y+JvB[id+n_contact*2]*gam_z;
+    out_omg_zB[id] = JwB[id+n_contact*0]*gam_x+JwB[id+n_contact*1]*gam_y+JwB[id+n_contact*2]*gam_z;
 
 }
 double end = omp_get_wtime();
-printf("Time: \t %f \t %f Gflops\n", (end-start)*1000, (85*n_contact)/((end-start))/(1e9)); 
+
+    total_time_omp += (end - start) * 1000;
+    total_flops += 60*contacts/((end - start))/1e9;
+    total_memory+= 204*contacts/((end - start) )/1024.0/1024.0/1024.0;
+
+}
+
+    printf("\nExecution time in milliseconds =  %0.3f ms | %0.3f Gflop | %0.3f GB/s \n", total_time_omp/runs, total_flops/runs, total_memory/runs);
 
     //release host memory
     free(JxA           );
@@ -150,21 +166,21 @@ printf("Time: \t %f \t %f Gflops\n", (end-start)*1000, (85*n_contact)/((end-star
     free(gamma_y       );
     free(gamma_z       );
 
-    free(out_velocity_xA);
-    free(out_velocity_yA);
-    free(out_velocity_zA);
+    free(out_vel_xA);
+    free(out_vel_yA);
+    free(out_vel_zA);
 
-    free(out_omega_xA   );
-    free(out_omega_yA   );
-    free(out_omega_zA   );
+    free(out_omg_xA   );
+    free(out_omg_yA   );
+    free(out_omg_zA   );
 
-    free(out_velocity_xB);
-    free(out_velocity_yB);
-    free(out_velocity_zB);
+    free(out_vel_xB);
+    free(out_vel_yB);
+    free(out_vel_zB);
 
-    free(out_omega_xB   );
-    free(out_omega_yB   );
-    free(out_omega_zB   );
+    free(out_omg_xB   );
+    free(out_omg_yB   );
+    free(out_omg_zB   );
  
     return 0;
 }
