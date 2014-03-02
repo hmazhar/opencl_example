@@ -211,17 +211,15 @@ for(int id=0; id<n_contact; id++){
     }
     W *=  mzlen;
     V = cross(W, U);
-
-
-    float4 _JxA = -U, _JyA = -V, _JzA = -W;
-    float4 _JuA = JuA[id], _JvA = JvA[id], _JwA = JwA[id];
-    float4 _JxB = U, _JyB = V, _JzB = W;
-    float4 _JuB = JuB[id], _JvB = JvB[id], _JwB = JwB[id];
-
-    out_vel_A[id] = _JxA*gam.x+_JyA*gam.y+_JzA*gam.z;
-    out_omg_A[id] = _JuA*gam.x+_JvA*gam.y+_JwA*gam.z;
-    out_vel_B[id] = _JxB*gam.x+_JyB*gam.y+_JzB*gam.z;
-    out_omg_B[id] = _JuB*gam.x+_JvB*gam.y+_JwB*gam.z;
+ out_vel_A[id] = -U*gam.x -V*gam.y-W*gam.z;
+ out_vel_B[id] = U*gam.x+V*gam.y+W*gam.z;
+}
+#pragma omp parallel for
+for(int id=0; id<n_contact; id++){
+    float4 gam = h_g[id];
+    out_omg_A[id] = JuA[id]*gam.x+JvA[id]*gam.y+JwA[id]*gam.z;
+    
+    out_omg_B[id] = JuB[id]*gam.x+JvB[id]*gam.y+JwB[id]*gam.z;
 
 }
 double end = omp_get_wtime();
