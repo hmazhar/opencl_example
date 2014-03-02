@@ -49,6 +49,7 @@ public:
     inline float4& operator/=(float b) { *this = *this / b; return *this; }
 
   inline float length() const  {return _mm_cvtss_f32(_mm_sqrt_ss(_mm_dp_ps(mmvalue, mmvalue, 0x71)));}
+  inline float rlength() const  {return _mm_cvtss_f32(_mm_rsqrt_ss(_mm_dp_ps(mmvalue, mmvalue, 0x71)));}
 
 inline float4 cross(const float4 &b) const {
       return _mm_sub_ps(
@@ -63,6 +64,7 @@ inline float4 operator-(float a, const float4& b) { return float4(a) - b; }
 inline float4 operator*(float a, const float4& b) { return b * a; }
 inline float4 operator/(float a, const float4& b) { return float4(a) / b; }
 inline float length(const float4& a) { return a.length(); }
+inline float rlength(const float4& a) { return a.rlength(); }
 
 inline float4 cross(const float4& a, const float4& b) { return a.cross(b); }
 
@@ -200,14 +202,14 @@ for(int id=0; id<n_contact; id++){
 
     float4 U = JxA[id], V, W;
     W = cross(U, float4(0, 1, 0,0));
-    float mzlen = length(W);
+    float mzlen = rlength(W);
 
-    if (mzlen < 0.0001f) { 
+    if (mzlen < 1.0f/0.0001f) { 
         float4 mVsingular = float4(1, 0, 0,0);
         W = cross(U, mVsingular);
-        mzlen = length(W);
+        mzlen = rlength(W);
     }
-    W = W * (1.0f / mzlen);
+    W *=  mzlen;
     V = cross(W, U);
 
 
