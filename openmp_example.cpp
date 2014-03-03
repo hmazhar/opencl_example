@@ -263,7 +263,7 @@ int main(int argc, char *argv[]) {
 	double total_time_omp;
 	double total_flops;
 	double total_memory;
-	double runs = 100;
+	double runs = 10;
 	for (int i = 0; i < runs; i++) {
 
 		double start = omp_get_wtime();
@@ -274,13 +274,13 @@ int main(int argc, char *argv[]) {
 
 		double end = omp_get_wtime();
 
-		total_time_omp += (end - start) * 1000;
-		total_flops += 60 * contacts / ((end - start)) / 1e9;
-		total_memory += (12 * 4 * 4) * contacts / ((end - start)) / 1024.0 / 1024.0 / 1024.0;
-
+		total_time_omp = (end - start) * 1000;
+		total_flops = 12 * contacts / ((end - start)) / 1e9;
+		total_memory = (7 * 4 * 4 + 1 * 4) * contacts / ((end - start)) / 1024.0 / 1024.0 / 1024.0;
+		printf("\nExecution time in milliseconds =  %0.3f ms | %0.3f Gflop | %0.3f GB/s \n", total_time_omp , total_flops , total_memory );
 	}
 
-	printf("\nExecution time in milliseconds =  %0.3f ms | %0.3f Gflop | %0.3f GB/s \n", total_time_omp / runs, total_flops / runs, total_memory / runs);
+
 
 	//release host memory
 	free(JxA);
