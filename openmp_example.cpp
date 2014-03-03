@@ -191,8 +191,8 @@ int main(int argc, char *argv[]) {
 
 	vector<float>h_g(contacts*3);
 
-	vector<float4> out_vel_A(contacts);
-	vector<float4> out_omg_A(contacts);
+	vector<float4> out_vel_A(contacts*2);
+	vector<float4> out_omg_A(contacts*2);
 
 	// Initialize vectors on host
 	int i;
