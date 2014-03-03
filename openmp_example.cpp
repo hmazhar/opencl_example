@@ -168,38 +168,31 @@ int main(int argc, char *argv[]) {
 
 	unsigned int constraints = contacts * 3;
 
-	// Host input vectors
-	float *gamma_x, *gamma_y, *gamma_z;
-// Host output vectors
-	float *out_vel_x, *out_vel_y, *out_vel_z;
-	float *out_omg_x, *out_omg_y, *out_omg_z;
-
 	// Size, in bytes, of each vector
 	size_t bytes = contacts * sizeof(float);
 
 	// Allocate memory for each vector on host
-	float4 * JxA = (float4*) malloc(contacts * sizeof(float4));
-	float4 * JyA = (float4*) malloc(contacts * sizeof(float4));
-	float4 * JzA = (float4*) malloc(contacts * sizeof(float4));
 
-	float4 * JuA = (float4*) malloc(contacts * sizeof(float4));
-	float4 * JvA = (float4*) malloc(contacts * sizeof(float4));
-	float4 * JwA = (float4*) malloc(contacts * sizeof(float4));
+	vector<float4> JxA (contacts);
+	vector<float4> JyA (contacts);
+	vector<float4> JzA (contacts);
 
-	float4 * JxB = (float4*) malloc(contacts * sizeof(float4));
-	float4 * JyB = (float4*) malloc(contacts * sizeof(float4));
-	float4 * JzB = (float4*) malloc(contacts * sizeof(float4));
+	vector<float4> JuA (contacts);
+	vector<float4> JvA (contacts);
+	vector<float4> JwA (contacts);
 
-	float4 * JuB = (float4*) malloc(contacts * sizeof(float4));
-	float4 * JvB = (float4*) malloc(contacts * sizeof(float4));
-	float4 * JwB = (float4*) malloc(contacts * sizeof(float4));
+	vector<float4> JxB (contacts);
+	vector<float4> JyB (contacts);
+	vector<float4> JzB (contacts);
 
-	float * h_g = (float*) malloc(contacts*3 * sizeof(float));
+	vector<float4> JuB (contacts);
+	vector<float4> JvB (contacts);
+	vector<float4> JwB (contacts);
 
-	float4 * out_vel_A = (float4*) malloc(contacts*2 * sizeof(float4));
-	float4 * out_omg_A = (float4*) malloc(contacts*2 * sizeof(float4));
-	float4 * out_vel_B = (float4*) malloc(contacts * sizeof(float4));
-	float4 * out_omg_B = (float4*) malloc(contacts * sizeof(float4));
+	vector<float>h_g(contacts);
+
+	vector<float4> out_vel_A(contacts);
+	vector<float4> out_omg_A(contacts);
 
 	// Initialize vectors on host
 	int i;
@@ -269,7 +262,7 @@ int main(int argc, char *argv[]) {
 		double start = omp_get_wtime();
 
 
-		F(contacts,  h_g, JxA, JuA,  JuB,  out_vel_A, out_omg_A);
+		F(contacts,  h_g.data(), JxA.data(), JuA.data(),  JuB.data(),  out_vel_A.data(), out_omg_A.data());
 
 
 		double end = omp_get_wtime();
@@ -283,28 +276,7 @@ int main(int argc, char *argv[]) {
 
 
 	//release host memory
-	free(JxA);
-	free(JyA);
-	free(JzA);
 
-	free(JuA);
-	free(JvA);
-	free(JwA);
-
-	free(JxB);
-	free(JyB);
-	free(JzB);
-
-	free(JuB);
-	free(JvB);
-	free(JwB);
-
-	free(h_g);
-
-	free(out_vel_A);
-	free(out_omg_A);
-	free(out_vel_B);
-	free(out_omg_B);
 
 	return 0;
 }
