@@ -189,7 +189,7 @@ int main(int argc, char *argv[]) {
 	vector<float4> JvB (contacts);
 	vector<float4> JwB (contacts);
 
-	vector<float>h_g(contacts);
+	vector<float>h_g(contacts*3);
 
 	vector<float4> out_vel_A(contacts);
 	vector<float4> out_omg_A(contacts);
