@@ -246,7 +246,7 @@ int main(int argc, char *argv[]) {
 
 		total_time_omp = (end - start) * 1000;
 		total_flops = 12 * contacts / ((end - start)) / 1e9;
-		total_memory = (7 * 4 * 4 + 1 * 4) * contacts / ((end - start)) / 1024.0 / 1024.0 / 1024.0;
+		total_memory = (12 * 4 * 4) * contacts / ((end - start)) / 1024.0 / 1024.0 / 1024.0;
 		printf("\nExecution time in milliseconds =  %0.3f ms | %0.3f Gflop | %0.3f GB/s \n", total_time_omp, total_flops, total_memory);
 	}
 
