@@ -137,29 +137,29 @@ inline float4 cross(const float4& a, const float4& b) {
 void Function_1(int n_contact, float4* h_g, float4* norm, float4* JuA, float4* JuB, float4* JvA, float4* JvB, float4* JwA, float4* JwB, float4* out_vel_A, float4* out_omg_A,
 		float4* out_vel_B, float4* out_omg_B) {
 
-#pragma omp parallel for
-	for (int id = 0; id < n_contact; id++) {
+#pragma omp parallel
+	{
 
-		float4 gam = h_g[id];
+#pragma omp for schedule(static, 4)
+		for (int id = 0; id < n_contact; id++) {
+			float4 gam = h_g[id];
+			float4 U = norm[id], V, W;
+			W = cross(U, (float4) (0, 1, 0));
+			float mzlen = length(W);
 
-		float4 U = norm[id], V, W;
+			if (mzlen < 0.0001f) {
+				float4 mVsingular = (float4) (1, 0, 0);
+				W = cross(U, mVsingular);
+				mzlen = length(W);
+			}
+			W = W * 1.0f / mzlen;
+			V = cross(W, U);
 
-		W = cross(U, (float4) (0, 1, 0));
-		float mzlen = length(W);
-
-		if (mzlen < 0.0001f) {
-			float4 mVsingular = (float4) (1, 0, 0);
-			W = cross(U, mVsingular);
-			mzlen = length(W);
+			out_vel_A[id] = -U * gam - V * gam - W * gam;
+			out_vel_B[id] = U * gam + V * gam + W * gam;
+			out_omg_A[id] = JuA[id] * gam + JvA[id] * gam + JwA[id] * gam;
+			out_omg_B[id] = JuB[id] * gam + JvB[id] * gam + JwB[id] * gam;
 		}
-		W = W * 1.0f / mzlen;
-		V = cross(W, U);
-
-		out_vel_A[id] = -U * gam - V * gam - W * gam;
-		out_vel_B[id] = U * gam + V * gam + W * gam;
-		out_omg_A[id] = JuA[id] * gam + JvA[id] * gam + JwA[id] * gam;
-		out_omg_B[id] = JuB[id] * gam + JvB[id] * gam + JwB[id] * gam;
-
 	}
 }
 
