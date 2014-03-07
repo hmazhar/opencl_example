@@ -134,19 +134,31 @@ inline float4 cross(const float4& a, const float4& b) {
 	return a.cross(b);
 }
 
-void Function_1(int n_contact, float* h_g, float4* norm, float4* JuA, float4* JuB, float4* out_vel_A, float4* out_omg_A, float4* out_vel_B, float4* out_omg_B) {
+void Function_1(int n_contact, float4* h_g, float4* norm, float4* JuA, float4* JuB, float4* JvA, float4* JvB, float4* JwA, float4* JwB, float4* out_vel_A, float4* out_omg_A,
+		float4* out_vel_B, float4* out_omg_B) {
 
 #pragma omp parallel for
 	for (int id = 0; id < n_contact; id++) {
 
-		float gam = h_g[id * 6];
+		float4 gam = h_g[id];
 
-		float4 U = norm[id];
+		float4 U = norm[id], V, W;
 
-		out_vel_A[id] = -U * gam;
-		out_vel_B[id] = U * gam;
-		out_omg_A[id] = JuA[id] * gam;
-		out_omg_B[id] = JuB[id] * gam;
+		W = cross(U, (float4) (0, 1, 0));
+		float mzlen = length(W);
+
+		if (mzlen < 0.0001f) {
+			float4 mVsingular = (float4) (1, 0, 0);
+			W = cross(U, mVsingular);
+			mzlen = length(W);
+		}
+		W = W * 1.0f / mzlen;
+		V = cross(W, U);
+
+		out_vel_A[id] = -U * gam - V * gam - W * gam;
+		out_vel_B[id] = U * gam + V * gam + W * gam;
+		out_omg_A[id] = JuA[id] * gam + JvA[id] * gam + JwA[id] * gam;
+		out_omg_B[id] = JuB[id] * gam + JvB[id] * gam + JwB[id] * gam;
 
 	}
 }
@@ -189,7 +201,7 @@ int main(int argc, char *argv[]) {
 	vector<float4> JvB(contacts);
 	vector<float4> JwB(contacts);
 
-	vector<float> h_g(contacts * 6);
+	vector<float4> h_g(contacts);
 
 	vector<float4> out_vel_A(contacts * 2);
 	vector<float4> out_omg_A(contacts * 2);
@@ -199,27 +211,21 @@ int main(int argc, char *argv[]) {
 	// Initialize vectors on host
 	int i;
 	for (i = 0; i < contacts; i++) {
-		JxA[i]= float4(cosf(i) * cosf(i));
-		JyA[i]= float4(cosf(i) * cosf(i));
-		JzA[i]= float4(cosf(i) * cosf(i));
+		JxA[i] = float4(cosf(i) * cosf(i));
+		JyA[i] = float4(cosf(i) * cosf(i));
+		JzA[i] = float4(cosf(i) * cosf(i));
 
-		h_g[i] = sinf(i) * sinf(i);
-		h_g[i + contacts] = sinf(i) * sinf(i);
-		h_g[i + contacts * 2] = sinf(i) * sinf(i);
-		h_g[i + contacts * 3] = sinf(i) * sinf(i);
-		h_g[i + contacts * 4] = sinf(i) * sinf(i);
-		h_g[i + contacts * 5] = sinf(i) * sinf(i);
+		h_g[i] = float4(sinf(i) * sinf(i));
 
-		JuA[i]= float4(cosf(i) * cosf(i));
-		JvA[i]= float4(cosf(i) * cosf(i));
-		JwA[i]= float4(cosf(i) * cosf(i));
-		JxB[i]= float4(cosf(i) * cosf(i));
-		JyB[i]= float4(cosf(i) * cosf(i));
-		JzB[i]= float4(cosf(i) * cosf(i));
-		JuB[i]= float4(cosf(i) * cosf(i));
-		JvB[i]= float4(cosf(i) * cosf(i));
-		JwB[i]= float4(cosf(i) * cosf(i));
-
+		JuA[i] = float4(cosf(i) * cosf(i));
+		JvA[i] = float4(cosf(i) * cosf(i));
+		JwA[i] = float4(cosf(i) * cosf(i));
+		JxB[i] = float4(cosf(i) * cosf(i));
+		JyB[i] = float4(cosf(i) * cosf(i));
+		JzB[i] = float4(cosf(i) * cosf(i));
+		JuB[i] = float4(cosf(i) * cosf(i));
+		JvB[i] = float4(cosf(i) * cosf(i));
+		JwB[i] = float4(cosf(i) * cosf(i));
 
 	}
 
@@ -233,7 +239,8 @@ int main(int argc, char *argv[]) {
 
 		double start = omp_get_wtime();
 
-		Function_1(contacts, h_g.data(), JxA.data(), JuA.data(), JuB.data(), out_vel_A.data(), out_omg_A.data(), out_vel_B.data(), out_omg_B.data());
+		Function_1(contacts, h_g.data(), JxA.data(), JuA.data(), JuB.data(), JvA.data(), JvB.data(), JwA.data(), JwB.data(), out_vel_A.data(), out_omg_A.data(), out_vel_B.data(),
+				out_omg_B.data());
 
 		double end = omp_get_wtime();
 
